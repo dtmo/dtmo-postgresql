@@ -1,0 +1,24 @@
+---
+- name: Set platform/version specific variables
+  ansible.builtin.include_tasks: tasks/set_vars.yml
+
+- name: Perform platform specific PostgreSQL install
+  vars:
+    __postgresql_ff_params:
+      files:
+        - "{{ ansible_facts['distribution'] }}_{{ ansible_facts['distribution_version'] }}.yml"
+        - "{{ ansible_facts['os_family'] }}_{{ ansible_facts['distribution_version'] }}.yml"
+        - "{{ ansible_facts['distribution'] }}_{{ ansible_facts['distribution_major_version'] }}.yml"
+        - "{{ ansible_facts['os_family'] }}_{{ ansible_facts['distribution_major_version'] }}.yml"
+        - "{{ ansible_facts['distribution'] }}.yml"
+        - "{{ ansible_facts['os_family'] }}.yml"
+        - "default.yml"
+      paths:
+        - "{{ role_path }}/tasks/install"
+  ansible.builtin.include_tasks: "{{ lookup('first_found', __postgresql_ff_params) }}"
+
+- name: Initialise database
+  ansible.builtin.include_tasks: "{{ role_path }}/tasks/initdb.yml"
+
+- name: Configure PostgreSQL
+  ansible.builtin.include_tasks: "{{ role_path }}/tasks/configure.yml"

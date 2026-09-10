@@ -1,0 +1,82 @@
+---
+# Dependency management (download roles/collections)
+dependency:
+  name: galaxy
+  options:
+    ignore-certs: false
+    ignore-errors: false
+    role-file: molecule/requirements.yml
+    requirements-file: molecule/requirements.yml
+
+driver:
+  name: molecule_libvirt
+  defaults:
+    ssh_user: molecule
+    disk_size: 50G
+    ram_mib: 4096
+    vcpus: 2
+
+platforms:
+  - name: rocky-9
+    disk_file_path: $HOME/.local/lib/libvirt/images/packer-rocky9
+    os_id: http://rockylinux.org/rocky/9
+    groups:
+      - postgresql_hosts
+  - name: rocky-10
+    disk_file_path: $HOME/.local/lib/libvirt/images/packer-rocky_10
+    os_id: http://rockylinux.org/rocky/10
+    groups:
+      - postgresql_hosts
+  - name: ubuntu-26
+    disk_file_path: $HOME/.local/lib/libvirt/images/packer-ubuntu_26
+    os_id: http://ubuntu.com/ubuntu/26.04
+    groups:
+      - postgresql_hosts
+
+ansible:
+  cfg:
+    defaults:
+      host_key_checking: false
+      verbosity: 1
+    ssh_connection:
+      pipelining: true
+  env:
+    ANSIBLE_FORCE_COLOR: "1"
+    ANSIBLE_LOAD_CALLBACK_PLUGINS: "1"
+
+  executor:
+    backend: ansible-playbook
+    args:
+      ansible_playbook:
+        - --diff
+        - --force-handlers
+        - --inventory=inventory.yml
+      ansible_navigator:
+        - --mode stdout
+        - --pull-policy missing
+        - --execution-environment-image ghcr.io/ansible/community-ansible-dev-tools:latest
+
+  playbooks:
+    create: create.yml
+    converge: converge.yml
+    destroy: destroy.yml
+    cleanup: cleanup.yml
+    prepare: prepare.yml
+    side_effect: side_effect.yml
+    verify: verify.yml
+
+scenario:
+  name: default
+  test_sequence:
+    - dependency
+    - cleanup
+    - destroy
+    - syntax
+    - create
+    - prepare
+    - converge
+    - idempotence
+    - side_effect
+    - verify
+    - cleanup
+    - destroy

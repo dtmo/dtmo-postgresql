@@ -1,0 +1,23 @@
+---
+- name: Ensure the PostgreSQL data directory exists
+  become: true
+  ansible.builtin.file:
+    path: "{{ __postgresql_data_dir }}"
+    state: directory
+    owner: "{{ __postgresql_user }}"
+    mode: "0700"
+
+- name: Check for PG_VERSION file.
+  become: true
+  ansible.builtin.stat:
+    path: "{{ __postgresql_data_dir }}/PG_VERSION"
+  register: __postgresql_stat_pg_version_result
+
+- name: Initialise PosgreSQL
+  become: true
+  become_user: "{{ __postgresql_user }}"
+  ansible.builtin.command:
+    cmd: "{{ __postgresql_bin_dir }}/initdb -D {{ __postgresql_data_dir }}"
+  changed_when: true
+  when: not __postgresql_stat_pg_version_result.stat.exists
+  notify: Reload PostgreSQL config

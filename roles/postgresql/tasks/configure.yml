@@ -1,0 +1,17 @@
+- name: Configure authentication
+  become: true
+  ansible.builtin.template:
+    src: pg_hba.conf.j2
+    dest: "{{ __postgresql_config_dir }}/pg_hba.conf"
+    owner: "{{ __postgresql_user }}"
+    mode: "0600"
+  notify: Reload PostgreSQL config
+
+- name: Configure parameters file
+  become: true
+  ansible.builtin.template:
+    src: postgresql.conf.j2
+    dest: "{{ __postgresql_config_dir }}/postgresql.conf"
+    owner: "{{ __postgresql_user }}"
+    mode: "0600"
+  notify: Restart PostgreSQL

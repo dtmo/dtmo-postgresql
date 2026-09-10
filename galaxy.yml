@@ -1,0 +1,23 @@
+namespace: dtmo
+name: postgresql
+version: 1.0.0
+readme: README.md
+authors:
+  - Damian Morgan <dtmorgan@gmail.com>
+description: A collection for working with PostgreSQL.
+license:
+  - PostgreSQL
+tags:
+  - application
+  - database
+  - linux
+  - postgresql
+dependencies: {}
+repository: https://github.com/dtmo/dtmo-postgresql
+documentation: https://github.com/dtmo/dtmo-postgresql/README.md
+homepage: https://github.com/dtmo/dtmo-postgresql
+issues: https://github.com/dtmo/dtmo-postgresql/issues
+manifest:
+  directives:
+    - include roles/*/README.md
+    - recursive-exclude roles/*/molecule **

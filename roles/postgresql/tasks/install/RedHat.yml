@@ -1,0 +1,26 @@
+- name: Install PostgreSQL YUM repository key
+  become: true
+  ansible.builtin.rpm_key:
+    key: https://download.postgresql.org/pub/repos/yum/keys/PGDG-RPM-GPG-KEY-RHEL
+    state: present
+
+- name: Install PostgreSQL YUM repository
+  become: true
+  ansible.builtin.package:
+    # noqa: yaml[line-length]
+    name: https://download.postgresql.org/pub/repos/yum/reporpms/EL-{{ ansible_facts.distribution_major_version }}-{{ ansible_facts.architecture }}/pgdg-redhat-repo-latest.noarch.rpm
+    state: present
+
+- name: Install PostgreSQL
+  become: true
+  ansible.builtin.package:
+    name:
+      - postgresql{{ postgresql_version }}-server
+    state: present
+
+- name: Enable PostgreSQL service
+  become: true
+  ansible.builtin.systemd_service:
+    name: "{{ __postgresql_service_name }}"
+    enabled: true
+  notify: Restart PostgreSQL

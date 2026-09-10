@@ -1,0 +1,7 @@
+all:
+  children:
+    postgresql_hosts:
+      vars:
+        postgresql_listen_addresses: ['*']
+        postgresql_port: 5432
+        

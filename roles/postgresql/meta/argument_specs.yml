@@ -1,0 +1,1011 @@
+argument_specs:
+  main:
+    short_description: Main entry point for the postgresql role
+    options:
+      postgresql_version:
+        description:
+          - The version of PostgreSQL to install.
+        type: str
+        default: 18
+
+      postgresql_authentication_records:
+        description: >
+          Which hosts are allowed to connect, how clients are authenticated, which PostgreSQL user names they can use,
+          which databases they can access.
+        type: list
+        elements: dict
+        default:
+            # "local" is for Unix domain socket connections only
+          - { type: local, databases: [all], users: [all], method: trust }
+            # IPv4 local connections:
+          - { type: host, databases: [all], users: [all], address: 127.0.0.1/32, method: trust}
+            # IPv6 local connections:
+          - { type: host, databases: [all], users: [all], address: "::1/128", method: trust}
+            # Allow replication connections from localhost, by a user with the
+            # replication privilege.
+          - { type: local, databases: [replication], users: [all], method: trust}
+          - { type: host, databases: [replication], users: [all], address: 127.0.0.1/32, method: trust}
+          - { type: host, databases: [replication], users: [all], address: "::1/128", method: trust}
+        options:
+          type:
+            description:
+              - The connection type
+              - "`local` is a Unix-domain socket"
+              - "`host` is a TCP/IP socket (encrypted or not)"
+              - "`hostssl` is a TCP/IP socket that is SSL-encrypted"
+              - "`hostnossl` is a TCP/IP socket that is not SSL-encrypted"
+              - "`hostgssenc` is a TCP/IP socket that is GSSAPI-encrypted"
+              - "`hostnogssenc` is a TCP/IP socket that is not GSSAPI-encrypted"
+            type: str
+            choices:
+              - local
+              - host
+              - hostssl
+              - hostnossl
+              - hostgssenc
+              - hostnogssenc
+          databases:
+            description:
+              - The databases that a client may connect to.
+              - >
+                Can be `all`, `sameuser`, `samerole`, `replication`, a database name, a regular expression (if it starts
+                with a slash `/`).
+              - Can be a file name prefixed with `@` to include names from a separate file.
+              - >
+                The `all` keyword does not match `replication`. Access to replication must be enabled in a separate
+                record.
+              - >
+                Database names containing spaces, commas, quotes and other special characters must be quoted.
+                Quoting one of the keywords `all`, `sameuser`, `samerole` or `replication` makes the name lose its
+                special character, and just match a database with that name.
+            type: list
+            elements: str
+            required: true
+          users:
+            description:
+              - >
+                Can be `all`, a user name, a group name prefixed with `+`, a regular expression (if it starts with a
+                slash `/`).
+              - Can be a file name prefixed with `@` to include names from a separate file.
+            type: list
+            elements: str
+            required: true
+          address:
+            description:
+              - Specifies the set of hosts the record matches.
+              - >
+                It can be a host name, or it is made up of an IP address and a CIDR mask that is an integer (between 0
+                and 32 (IPv4) or 128 (IPv6) inclusive) that specifies the number of significant bits in the mask.
+              - >
+                A host name that starts with a dot (.) matches a suffix of the actual host name. Alternatively, you can
+                write an IP address and netmask in separate columns to specify the set of hosts.
+              - >
+                Instead of a CIDR-address, you can write `samehost` to match any of the server's own IP addresses, or
+                `samenet` to match any address in any subnet that the server is directly connected to.
+            type: str
+            required: false
+          method:
+            description:
+              - >
+                Can be `trust`, `reject`, `md5`, `password`, `scram-sha-256`, `gss`, `sspi`, `ident`, `peer`, `pam`,
+                `oauth`, `ldap`, `radius` or `cert`.
+              - >
+                Note that `password` sends passwords in clear text; `md5` or `scram-sha-256` are preferred since they
+                send encrypted passwords.
+            type: str
+            choices:
+              - trust
+              - reject
+              - md5
+              - password
+              - scram-sha-256
+              - gss
+              - sspi
+              - ident
+              - peer
+              - pam
+              - oauth
+              - ldap
+              - radius
+              - cert
+            required: true
+          options:
+            description:
+              - A set of options for the authentication.
+              - >
+                The available options depend on the different authentication methods -- refer to the "Client
+                Authentication" section in the documentation for a list of which options are available for which
+                authentication methods.
+            type: list
+            elements: dict
+            default: []
+            options:
+              name:
+                description: The option name
+                type: str
+                required: true
+              value:
+                description: The option value
+                type: str
+                required: true
+
+      postgresql_listen_addresses:
+        description:
+          - >
+            Specifies the TCP/IP address(es) on which the server is to listen for connections from client applications.
+            The value takes the form of a comma-separated list of host names and/or numeric IP addresses. The special
+            entry `*` corresponds to all available IP interfaces. The entry `0.0.0.0` allows listening for all IPv4
+            addresses and `::` allows listening for all IPv6 addresses. If the list is empty, the server does not listen
+            on any IP interface at all, in which case only Unix-domain sockets can be used to connect to it. If the list
+            is not empty, the server will start if it can listen on at least one TCP/IP address. A warning will be
+            emitted for any TCP/IP address which cannot be opened. The default value is localhost, which allows only
+            local TCP/IP “loopback” connections to be made.
+          - >
+            While client authentication allows fine-grained control over who can access the server, listen_addresses
+            controls which interfaces accept connection attempts, which can help prevent repeated malicious connection
+            requests on insecure network interfaces. This parameter can only be set at server start.
+        type: list
+        elements: str
+        default: localhost
+
+      postgresql_port:
+        description: >
+          The TCP port the server listens on; 5432 by default. Note that the same port number is used for all IP
+          addresses the server listens on. This parameter can only be set at server start.
+        type: int
+        default: 5432
+
+      postgresql_max_connections:
+        description:
+          - >
+            Determines the maximum number of concurrent connections to the database server. The default is typically 100
+            connections, but might be less if your kernel settings will not support it (as determined during initdb).
+            This parameter can only be set at server start.
+          - >
+            PostgreSQL sizes certain resources based directly on the value of `max_connections`. Increasing its value
+            leads to higher allocation of those resources, including shared memory.
+          - >
+            When running a standby server, you must set this parameter to the same or higher value than on the primary
+            server. Otherwise, queries will not be allowed in the standby server.
+        type: int
+        default: 100
+
+      postgresql_reserved_connections:
+        description:
+          - >
+            Determines the number of connection “slots” that are reserved for connections by roles with privileges of
+            the `pg_use_reserved_connections` role. Whenever the number of free connection slots is greater than
+            `superuser_reserved_connections` but less than or equal to the sum of `superuser_reserved_connections` and
+            reserved_connections, new connections will be accepted only for superusers and roles with privileges of
+            `pg_use_reserved_connections`. If `superuser_reserved_connections` or fewer connection slots are available,
+            new connections will be accepted only for superusers.
+          - >
+            The default value is zero connections. The value must be less than `max_connections` minus
+            `superuser_reserved_connections`. This parameter can only be set at server start.
+        type: int
+        default: 0
+
+      postgresql_superuser_reserved_connections:
+        description:
+          - >
+            Determines the number of connection “slots” that are reserved for connections by PostgreSQL superusers. At
+            most `max_connections` connections can ever be active simultaneously. Whenever the number of active
+            concurrent connections is at least `max_connections` minus `superuser_reserved_connections`, new connections
+            will be accepted only for superusers. The connection slots reserved by this parameter are intended as final
+            reserve for emergency use after the slots reserved by `reserved_connections` have been exhausted.
+          - >
+            The default value is three connections. The value must be less than `max_connections` minus
+            `reserved_connections`. This parameter can only be set at server start.
+        type: int
+        default: 3
+
+      postgresql_unix_socket_directories:
+        description:
+          - >
+            Specifies the directory of the Unix-domain socket(s) on which the server is to listen for connections from
+            client applications. An empty value specifies not listening on any Unix-domain sockets, in which case only
+            TCP/IP sockets can be used to connect to the server.
+          - >
+            A value that starts with `@` specifies that a Unix-domain socket in the abstract namespace should be created
+            (currently supported on Linux only). In that case, this value does not specify a "directory" but a prefix
+            from which the actual socket name is computed in the same manner as for the file-system namespace. While the
+            abstract socket name prefix can be chosen freely, since it is not a file-system location, the convention is
+            to nonetheless use file-system-like values such as `@/tmp`.
+          - >
+            The default value is normally `/tmp`, but that can be changed at build time. On Windows, the default is
+            empty, which means no Unix-domain socket is created by default. This parameter can only be set at server
+            start.
+          - >
+            In addition to the socket file itself, which is named `.s.PGSQL.nnnn` where `nnnn` is the server's port
+            number, an ordinary file named `.s.PGSQL.nnnn.lock` will be created in each of the `unix_socket_directories`
+            directories. Neither file should ever be removed manually. For sockets in the abstract namespace, no lock
+            file is created.
+        type: list
+        elements: path
+        default: ["/run/postgresql"]
+
+      postgresql_unix_socket_group:
+        description:
+          - >
+            Sets the owning group of the Unix-domain socket(s). (The owning user of the sockets is always the user that
+            starts the server.) In combination with the parameter `unix_socket_permissions` this can be used as an
+            additional access control mechanism for Unix-domain connections. By default this is the empty string, which
+            uses the default group of the server user. This parameter can only be set at server start.
+          - >
+            This parameter is not supported on Windows. Any setting will be ignored. Also, sockets in the abstract
+            namespace have no file owner, so this setting is also ignored in that case.
+        type: str
+        default: ""
+
+      postgresql_unix_socket_permissions:
+        description:
+          - >
+            Sets the access permissions of the Unix-domain socket(s). Unix-domain sockets use the usual Unix file system
+            permission set. The parameter value is expected to be a numeric mode specified in the format accepted by the
+            `chmod` and `umask` system calls. (To use the customary octal format the number must start with a `0`
+            (zero).)
+          - >
+            The default permissions are `0777`, meaning anyone can connect. Reasonable alternatives are `0770` (only
+            user and group, see also `unix_socket_group`) and `0700` (only user). (Note that for a Unix-domain socket,
+            only write permission matters, so there is no point in setting or revoking read or execute permissions.)
+          - This access control mechanism is independent of the one described in Chapter 20.
+          - This parameter can only be set at server start.
+          - >
+            This parameter is irrelevant on systems, notably Solaris as of Solaris 10, that ignore socket permissions
+            entirely. There, one can achieve a similar effect by pointing `unix_socket_directories` to a directory
+            having search permission limited to the desired audience.
+          - Sockets in the abstract namespace have no file permissions, so this setting is also ignored in that case.
+        type: str
+        default: "0777"
+
+      postgresql_bonjour:
+        description: >
+          Enables advertising the server's existence via Bonjour. The default is off. This parameter can only be set at
+          server start.
+        type: bool
+        default: false
+
+      postgresql_bonjour_name:
+        description: >
+          Specifies the Bonjour service name. The computer name is used if this parameter is set to the empty string
+          `''` (which is the default). This parameter is ignored if the server was not compiled with Bonjour support.
+          This parameter can only be set at server start.
+        type: str
+        default: ""
+
+      postgresql_tcp_keepalives_idle:
+        description: >
+          Specifies the amount of time with no network activity after which the operating system should send a TCP
+          keepalive message to the client. If this value is specified without units, it is taken as seconds. A value of
+          0 (the default) selects the operating system's default. On Windows, setting a value of 0 will set this
+          parameter to 2 hours, since Windows does not provide a way to read the system default value. This parameter is
+          supported only on systems that support `TCP_KEEPIDLE` or an equivalent socket option, and on Windows; on other
+          systems, it must be zero. In sessions connected via a Unix-domain socket, this parameter is ignored and always
+          reads as zero.
+        type: int
+        default: 0
+
+      postgresql_tcp_keepalives_interval:
+        description: >
+          Specifies the amount of time after which a TCP keepalive message that has not been acknowledged by the client
+          should be retransmitted. If this value is specified without units, it is taken as seconds. A value of 0 (the
+          default) selects the operating system's default. On Windows, setting a value of 0 will set this parameter to 1
+          second, since Windows does not provide a way to read the system default value. This parameter is supported
+          only on systems that support `TCP_KEEPINTVL` or an equivalent socket option, and on Windows; on other systems,
+          it must be zero. In sessions connected via a Unix-domain socket, this parameter is ignored and always reads as
+          zero.
+        type: int
+        default: 0
+
+      postgresql_tcp_keepalives_count:
+        description: >
+          Specifies the number of TCP keepalive messages that can be lost before the server's connection to the client
+          is considered dead. A value of 0 (the default) selects the operating system's default. This parameter is
+          supported only on systems that support `TCP_KEEPCNT` or an equivalent socket option (which does not include
+          Windows); on other systems, it must be zero. In sessions connected via a Unix-domain socket, this parameter is
+          ignored and always reads as zero.
+        type: int
+        default: 0
+
+      postgresql_tcp_user_timeout:
+        description: >
+          Specifies the amount of time that transmitted data may remain unacknowledged before the TCP connection is
+          forcibly closed. If this value is specified without units, it is taken as milliseconds. A value of 0 (the
+          default) selects the operating system's default. This parameter is supported only on systems that support
+          `TCP_USER_TIMEOUT` (which does not include Windows); on other systems, it must be zero. In sessions connected
+          via a Unix-domain socket, this parameter is ignored and always reads as zero.
+        type: int
+        default: 0
+
+      postgresql_client_connection_check_interval:
+        description:
+          - >
+            Sets the time interval between optional checks that the client is still connected, while running queries.
+            The check is performed by polling the socket, and allows long running queries to be aborted sooner if the
+            kernel reports that the connection is closed.
+          - >
+            This option relies on kernel events exposed by Linux, macOS, illumos and the BSD family of operating
+            systems, and is not currently available on other systems.
+          - >
+            If the value is specified without units, it is taken as milliseconds. The default value is 0, which disables
+            connection checks. Without connection checks, the server will detect the loss of the connection only at the
+            next interaction with the socket, when it waits for, receives or sends data.
+          - >
+            For the kernel itself to detect lost TCP connections reliably and within a known timeframe in all scenarios
+            including network failure, it may also be necessary to adjust the TCP keepalive settings of the operating
+            system, or the tcp_keepalives_idle, tcp_keepalives_interval and tcp_keepalives_count settings of PostgreSQL.
+        type: int
+        default: 0
+
+      postgresql_authentication_timeout:
+        description: >
+          Maximum amount of time allowed to complete client authentication. If a would-be client has not completed the
+          authentication protocol in this much time, the server closes the connection. This prevents hung clients from
+          occupying a connection indefinitely. If this value is specified without units, it is taken as seconds. The
+          default is one minute (`1m`). This parameter can only be set in the `postgresql.conf` file or on the server
+          command line.
+        type: str
+        default: 1min
+
+      postgresql_password_encryption:
+        description:
+          - >
+            When a password is specified in CREATE ROLE or ALTER ROLE, this parameter determines the algorithm to use to
+            encrypt the password. Possible values are `scram-sha-256`, which will encrypt the password with
+            SCRAM-SHA-256, and `md5`, which stores the password as an MD5 hash. The default is `scram-sha-256`.
+          - >
+            Note that older clients might lack support for the SCRAM authentication mechanism, and hence not work with
+            passwords encrypted with SCRAM-SHA-256. See Section 20.5 for more details.
+          - >
+            Warning - Support for MD5-encrypted passwords is deprecated and will be removed in a future release of
+            PostgreSQL. Refer to Section 20.5 for details about migrating to another password type.
+        type: str
+        choices:
+          - scram-sha-256
+          - md5
+        default: scram-sha-256
+
+      postgresql_scram_iterations:
+        description:
+          - >
+            The number of computational iterations to be performed when encrypting a password using SCRAM-SHA-256. The
+            default is `4096`. A higher number of iterations provides additional protection against brute-force attacks
+            on stored passwords, but makes authentication slower. Changing the value has no effect on existing passwords
+            encrypted with SCRAM-SHA-256 as the iteration count is fixed at the time of encryption. In order to make use
+            of a changed value, a new password must be set.
+          - >
+            Note - If a role password was created with a different iteration count than the value of scram_iterations
+            specified in the `postgresql.conf` file or on the server command line, an unauthenticated user can discern the
+            existence of the role by observing discrepancies in the server's responses to connection attempts. If you
+            find this concerning, ensure that all role passwords are created with scram_iterations set to the value
+            specified in the `postgresql.conf` file or on the server command line.
+        type: int
+        default: 4096
+
+      postgresql_md5_password_warnings:
+        description: >
+          Controls whether a `WARNING` about MD5 password deprecation is produced when a `CREATE ROLE` or `ALTER ROLE`
+          statement sets an MD5-encrypted password.
+        type: bool
+        default: true
+
+      postgresql_krb_server_keyfile:
+        type: str
+        description: >
+          Sets the location of the server's Kerberos key file. The default is `FILE:/usr/local/pgsql/etc/krb5.keytab`
+          (where the directory part is whatever was specified as `sysconfdir` at build time; use
+          `pg_config --sysconfdir` to determine that). If this parameter is set to an empty string, it is ignored and a
+          system-dependent default is used. This parameter can only be set in the `postgresql.conf` file or on the
+          server command line. See Section 20.6 for more information.
+        default: FILE:${sysconfdir}/krb5.keytab
+
+      postgresql_krb_caseins_users:
+        type: bool
+        description: >
+          Sets whether GSSAPI user names should be treated case-insensitively. The default is off (case sensitive). This
+          parameter can only be set in the `postgresql.conf` file or on the server command line.
+        default: false
+
+      postgresql_gss_accept_delegation:
+        type: bool
+        description: >
+          Sets whether GSSAPI delegation should be accepted from the client. The default is off meaning credentials from
+          the client will not be accepted. Changing this to on will make the server accept credentials delegated to it
+          from the client. This parameter can only be set in the `postgresql.conf` file or on the server command line.
+        default: false
+
+      postgresql_oauth_validator_libraries:
+        type: str
+        description:
+          - >
+            The library/libraries to use for validating OAuth connection tokens. If only one validator library is
+            provided, it will be used by default for any OAuth connections; otherwise, all oauth HBA entries must
+            explicitly set a validator chosen from this list. If set to an empty string (the default), OAuth connections
+            will be refused. This parameter can only be set in the `postgresql.conf` file.
+          - >
+            Validator modules must be implemented/obtained separately; PostgreSQL does not ship with any default
+            implementations. For more information on implementing OAuth validators, see Chapter 50.
+        default: ""
+
+      postgresql_ssl:
+        type: bool
+        description: >
+          Enables SSL connections. This parameter can only be set in the `postgresql.conf` file or on the server command
+          line. The default is off.
+        default: false
+
+      postgresql_ssl_ca_file:
+        type: str
+        description: >
+          Specifies the name of the file containing the SSL server certificate authority (CA). Relative paths are
+          relative to the data directory. This parameter can only be set in the `postgresql.conf` file or on the server
+          command line. The default is empty, meaning no CA file is loaded, and client certificate verification is not
+          performed.
+        default: ""
+
+      postgresql_ssl_cert_file:
+        type: path
+        description: >
+          Specifies the name of the file containing the SSL server certificate. Relative paths are relative to the data
+          directory. This parameter can only be set in the `postgresql.conf` file or on the server command line. The
+          default is `server.crt`.
+        default: server.crt
+
+      postgresql_ssl_crl_file:
+        type: path
+        description: >
+          Specifies the name of the file containing the SSL client certificate revocation list (CRL). Relative paths are
+          relative to the data directory. This parameter can only be set in the `postgresql.conf` file or on the server
+          command line. The default is empty, meaning no CRL file is loaded (unless ssl_crl_dir is set).
+        default: ""
+
+      postgresql_ssl_crl_dir:
+        type: path
+        description:
+          - >
+            Specifies the name of the directory containing the SSL client certificate revocation list (CRL). Relative
+            paths are relative to the data directory. This parameter can only be set in the `postgresql.conf` file or on
+            the server command line. The default is empty, meaning no CRLs are used (unless ssl_crl_file is set).
+          - >
+            The directory needs to be prepared with the OpenSSL command `openssl rehash` or `c_rehash`. See its
+            documentation for details.
+          - >
+            When using this setting, CRLs in the specified directory are loaded on-demand at connection time. New CRLs
+            can be added to the directory and will be used immediately. This is unlike ssl_crl_file, which causes the
+            CRL in the file to be loaded at server start time or when the configuration is reloaded. Both settings can
+            be used together.
+        default: ""
+
+      postgresql_ssl_key_file:
+        type: path
+        description: >
+          Specifies the name of the file containing the SSL server private key. Relative paths are relative to the data
+          directory. This parameter can only be set in the `postgresql.conf` file or on the server command line. The
+          default is `server.key`.
+        default: server.key
+
+      postgresql_ssl_tls13_ciphers:
+        type: list
+        elements: str
+        description:
+          - >
+            Specifies a list of cipher suites that are allowed by connections using TLS version 1.3. Multiple cipher
+            suites can be specified by using a colon separated list. If left blank, the default set of cipher suites in
+            OpenSSL will be used.
+          - >
+            This parameter can only be set in the `postgresql.conf` file or on the server command line.
+        default: []
+
+      postgresql_ssl_ciphers:
+        type: list
+        elements: str
+        description:
+          - >
+            Specifies a list of SSL ciphers that are allowed by connections using TLS version 1.2 and lower, see
+            ssl_tls13_ciphers for TLS version 1.3 connections. See the ciphers manual page in the OpenSSL package for
+            the syntax of this setting and a list of supported values. The default value is `HIGH:MEDIUM:+3DES:!aNULL`.
+            The default is usually a reasonable choice unless you have specific security requirements.
+          - >
+            This parameter can only be set in the `postgresql.conf` file or on the server command line.
+          - >
+            `HIGH`: Cipher suites that use ciphers from `HIGH` group (e.g., AES, Camellia, 3DES)
+          - >
+            `MEDIUM`: Cipher suites that use ciphers from `MEDIUM` group (e.g., RC4, SEED)
+          - >
+            `+3DES`: The OpenSSL default order for `HIGH` is problematic because it orders 3DES higher than AES128. This
+            is wrong because 3DES offers less security than AES128, and it is also much slower. +3DES reorders it after
+            all other HIGH and MEDIUM ciphers.
+          - >
+            `!aNULL`: Disables anonymous cipher suites that do no authentication. Such cipher suites are vulnerable to
+            MITM attacks and therefore should not be used.
+          - >
+            Available cipher suite details will vary across OpenSSL versions. Use the command
+            `openssl ciphers -v 'HIGH:MEDIUM:+3DES:!aNULL'` to see actual details for the currently installed OpenSSL
+            version. Note that this list is filtered at run time based on the server key type.
+        default: ["HIGH", "MEDIUM", "+3DES", "!aNULL"]
+
+      postgresql_ssl_prefer_server_ciphers:
+        type: bool
+        description:
+          - >
+            Specifies whether to use the server's SSL cipher preferences, rather than the client's. This parameter can
+            only be set in the `postgresql.conf` file or on the server command line. The default is on.
+          - >
+            PostgreSQL versions before 9.4 do not have this setting and always use the client's preferences.
+            This setting is mainly for backward compatibility with those versions. Using the server's preferences is
+            usually better because it is more likely that the server is appropriately configured.
+        default: true
+
+      postgresql_ssl_groups:
+        type: list
+        elements: str
+        description:
+          - >
+            Specifies the named group to use for TLS key exchange. It needs to be supported by all clients that connect.
+            Multiple groups can be specified by using a colon-separated list. It does not need to match the key type
+            used by the server certificate. This parameter can only be set in the `postgresql.conf` file or on the
+            server command line. The default is `X25519:prime256v1`.
+          - >
+            OpenSSL names for the most common groups are: `prime256v1` (NIST P-256), `secp384r1` (NIST P-384),
+            `secp521r1` (NIST P-521). An incomplete list of available groups can be shown with the command
+            `openssl ecparam -list_curves`. Not all of them are usable with TLS though, and many supported group names
+            and aliases are omitted.
+          - >
+            In PostgreSQL versions before 18.0 this setting was named `ssl_ecdh_curve` and only accepted a single value.
+        default: ["X25519", "prime256v1"]
+
+      postgresql_ssl_min_protocol_version:
+        type: str
+        choices:
+          - TLSv1
+          - TLSv1.1
+          - TLSv1.2
+          - TLSv1.3
+        description:
+          - >
+            Sets the minimum SSL/TLS protocol version to use. Valid values are currently: `TLSv1`, `TLSv1.1`, `TLSv1.2`,
+            `TLSv1.3`. Older versions of the OpenSSL library do not support all values; an error will be raised if an
+            unsupported setting is chosen. Protocol versions before TLS 1.0, namely SSL version 2 and 3, are always
+            disabled.
+          - >
+            The default is `TLSv1.2`, which satisfies industry best practices as of this writing.
+          - >
+            This parameter can only be set in the `postgresql.conf` file or on the server command line.
+        default: TLSv1.2
+
+      postgresql_ssl_max_protocol_version:
+        type: str
+        choices:
+          - ""
+          - TLSv1
+          - TLSv1.1
+          - TLSv1.2
+          - TLSv1.3
+        description:
+          - >
+            Sets the maximum SSL/TLS protocol version to use. Valid values are as for ssl_min_protocol_version, with
+            addition of an empty string, which allows any protocol version. The default is to allow any version. Setting
+            the maximum protocol version is mainly useful for testing or if some component has issues working with a
+            newer protocol.
+          - >
+            This parameter can only be set in the `postgresql.conf` file or on the server command line.
+        default: ""
+
+      postgresql_ssl_dh_params_file:
+        type: path
+        description:
+          - >
+            Specifies the name of the file containing Diffie-Hellman parameters used for so-called ephemeral DH family
+            of SSL ciphers. The default is empty, in which case compiled-in default DH parameters used. Using custom DH
+            parameters reduces the exposure if an attacker manages to crack the well-known compiled-in DH parameters.
+            You can create your own DH parameters file with the command `openssl dhparam -out dhparams.pem 2048`.
+          - >
+            This parameter can only be set in the `postgresql.conf` file or on the server command line.
+        default: ""
+
+      postgresql_ssl_passphrase_command:
+        type: str
+        description:
+          - >
+            Sets an external command to be invoked when a passphrase for decrypting an SSL file such as a private key
+            needs to be obtained. By default, this parameter is empty, which means the built-in prompting mechanism is
+            used.
+          - >
+            The command must print the passphrase to the standard output and exit with code 0. In the parameter value,
+            `%p` is replaced by a prompt string. (Write `%%` for a literal `%`.) Note that the prompt string will
+            probably contain whitespace, so be sure to quote adequately. A single newline is stripped from the end of
+            the output if present.
+          - >
+            The command does not actually have to prompt the user for a passphrase. It can read it from a file, obtain
+            it from a keychain facility, or similar. It is up to the user to make sure the chosen mechanism is
+            adequately secure.
+          - >
+            This parameter can only be set in the `postgresql.conf` file or on the server command line.
+        default: ""
+
+      postgresql_ssl_passphrase_command_supports_reload:
+        type: bool
+        description:
+          - >
+            This parameter determines whether the passphrase command set by ssl_passphrase_command will also be called
+            during a configuration reload if a key file needs a passphrase. If this parameter is off (the default), then
+            ssl_passphrase_command will be ignored during a reload and the SSL configuration will not be reloaded if a
+            passphrase is needed. That setting is appropriate for a command that requires a TTY for prompting, which
+            might not be available when the server is running. Setting this parameter to on might be appropriate if the
+            passphrase is obtained from a file, for example.
+          - >
+            This parameter must be set to on when running on Windows since all connections will perform a configuration
+            reload due to the different process model of that platform.
+          - >
+            This parameter can only be set in the `postgresql.conf` file or on the server command line.
+        default: false
+
+      postgresql_shared_buffers:
+        type: str
+        description:
+          - >
+            Sets the amount of memory the database server uses for shared memory buffers. The default is typically 128
+            egabytes (`128MB`), but might be less if your kernel settings will not support it (as determined during
+            initdb). This setting must be at least 128 kilobytes. However, settings significantly higher than the
+            minimum are usually needed for good performance. If this value is specified without units, it is taken as
+            blocks, that is `BLCKSZ` bytes, typically 8kB. (Non-default values of `BLCKSZ` change the minimum value.)
+            This parameter can only be set at server start.
+          - >
+            If you have a dedicated database server with 1GB or more of RAM, a reasonable starting value for
+            `shared_buffers` is 25% of the memory in your system. There are some workloads where even larger settings
+            for `shared_buffers` are effective, but because PostgreSQL also relies on the operating system cache, it is
+            unlikely that an allocation of more than 40% of RAM to `shared_buffers` will work better than a smaller
+            amount. Larger settings for `shared_buffers` usually require a corresponding increase in `max_wal_size`, in
+            order to spread out the process of writing large quantities of new or changed data over a longer period of
+            time.
+          - >
+            On systems with less than 1GB of RAM, a smaller percentage of RAM is appropriate, so as to leave adequate
+            space for the operating system.
+        default: 128MB
+
+      postgresql_huge_pages:
+        type: str
+        choices:
+          - "try"
+          - "on"
+          - "off"
+        description:
+          - >
+            Controls whether huge pages are requested for the main shared memory area. Valid values are `try` (the
+            default), `on`, and o`ff. This parameter can only be set at server start. With huge_pages set to `try`, the
+            server will try to request huge pages, but fall back to the default if that fails. With `on`, failure to
+            request huge pages will prevent the server from starting up. With `off`, huge pages will not be requested.
+            The actual state of huge pages is indicated by the server variable `huge_pages_status`.
+          - >
+            At present, this setting is supported only on Linux and Windows. The setting is ignored on other systems
+            when set to `try`. On Linux, it is only supported when `shared_memory_type` is set to `mmap` (the default).
+          - >
+            The use of huge pages results in smaller page tables and less CPU time spent on memory management,
+            increasing performance. For more details about using huge pages on Linux, see Section 18.4.5.
+          - >
+            Huge pages are known as large pages on Windows. To use them, you need to assign the user right "Lock pages
+            in memory" to the Windows user account that runs PostgreSQL. You can use Windows Group Policy tool
+            (gpedit.msc) to assign the user right “Lock pages in memory”. To start the database server on the command
+            prompt as a standalone process, not as a Windows service, the command prompt must be run as an administrator
+            or User Access Control (UAC) must be disabled. When the UAC is enabled, the normal command prompt revokes
+            the user right “Lock pages in memory” when started.
+          - >
+            Note that this setting only affects the main shared memory area. Operating systems such as Linux, FreeBSD,
+            and Illumos can also use huge pages (also known as “super” pages or “large” pages) automatically for normal
+            memory allocation, without an explicit request from PostgreSQL. On Linux, this is called “transparent huge
+            pages” (THP). That feature has been known to cause performance degradation with PostgreSQL for some users on
+            some Linux versions, so its use is currently discouraged (unlike explicit use of `huge_pages`).
+        default: try
+
+      postgresql_huge_page_size:
+        type: str
+        description:
+          - >
+            Controls the size of huge pages, when they are enabled with huge_pages. The default is zero (`0`). When set
+            to `0`, the default huge page size on the system will be used. This parameter can only be set at server
+            start.
+          - >
+            Some commonly available page sizes on modern 64 bit server architectures include: `2MB` and `1GB` (Intel and
+            AMD), `16MB` and `16GB` (IBM POWER), and `64kB`, `2MB`, `32MB` and `1GB` (ARM). For more information about
+            usage and support, see Section 18.4.5.
+          - Non-default settings are currently supported only on Linux.
+        default: "0"
+
+      postgresql_temp_buffers:
+        type: str
+        description:
+          - >
+            Sets the maximum amount of memory used for temporary buffers within each database session. These are
+            session-local buffers used only for access to temporary tables. If this value is specified without units, it
+            is taken as blocks, that is `BLCKSZ` bytes, typically 8kB. The default is eight megabytes (`8MB`). (If
+            `BLCKSZ` is not 8kB, the default value scales proportionally to it.) This setting can be changed within
+            individual sessions, but only before the first use of temporary tables within the session; subsequent
+            attempts to change the value will have no effect on that session.
+          - >
+            A session will allocate temporary buffers as needed up to the limit given by `temp_buffers`. The cost of
+            setting a large value in sessions that do not actually need many temporary buffers is only a buffer
+            descriptor, or about 64 bytes, per increment in `temp_buffers`. However if a buffer is actually used an
+            additional 8192 bytes will be consumed for it (or in general, `BLCKSZ` bytes).
+        default: 8MB
+
+      postgresql_max_prepared_transactions:
+        type: int
+        description:
+          - >
+            Sets the maximum number of transactions that can be in the “prepared” state simultaneously (see PREPARE
+            TRANSACTION). Setting this parameter to zero (which is the default) disables the prepared-transaction
+            feature. This parameter can only be set at server start.
+          - >
+            If you are not planning to use prepared transactions, this parameter should be set to zero to prevent
+            accidental creation of prepared transactions. If you are using prepared transactions, you will probably want
+            `max_prepared_transactions` to be at least as large as max_connections, so that every session can have a
+            prepared transaction pending.
+          - >
+            When running a standby server, you must set this parameter to the same or higher value than on the primary
+            server. Otherwise, queries will not be allowed in the standby server.
+        default: 0
+
+      postgresql_work_mem:
+        type: str
+        description:
+          - >
+            Sets the base maximum amount of memory to be used by a query operation (such as a sort or hash table) before
+            writing to temporary disk files. If this value is specified without units, it is taken as kilobytes. The
+            default value is four megabytes (`4MB`). Note that a complex query might perform several sort and hash
+            operations at the same time, with each operation generally being allowed to use as much memory as this value
+            specifies before it starts to write data into temporary files. Also, several running sessions could be doing
+            such operations concurrently. Therefore, the total memory used could be many times the value of `work_mem`;
+            it is necessary to keep this fact in mind when choosing the value. Sort operations are used for `ORDER BY`,
+            `DISTINCT`, and merge joins. Hash tables are used in hash joins, hash-based aggregation, memoize nodes and
+            hash-based processing of `IN` subqueries.
+          - >
+            Hash-based operations are generally more sensitive to memory availability than equivalent sort-based
+            operations. The memory limit for a hash table is computed by multiplying `work_mem` by
+            `hash_mem_multiplier`. This makes it possible for hash-based operations to use an amount of memory that
+            exceeds the usual `work_mem` base amount.
+        default: 4MB
+
+      postgresql_hash_mem_multiplier:
+        type: float
+        description:
+          - >
+            Used to compute the maximum amount of memory that hash-based operations can use. The final limit is
+            determined by multiplying `work_mem` by `hash_mem_multiplier`. The default value is 2.0, which makes
+            hash-based operations use twice the usual work_mem base amount.
+          - >
+            Consider increasing hash_mem_multiplier in environments where spilling by query operations is a regular
+            occurrence, especially when simply increasing `work_mem` results in memory pressure (memory pressure
+            typically takes the form of intermittent out of memory errors). The default setting of 2.0 is often
+            effective with mixed workloads. Higher settings in the range of 2.0 - 8.0 or more may be effective in
+            environments where `work_mem` has already been increased to 40MB or more.
+        default: 2.0
+
+      postgresql_maintenance_work_mem:
+        type: str
+        description:
+          - >
+            Specifies the maximum amount of memory to be used by maintenance operations, such as `VACUUM`,
+            `CREATE INDEX`, and `ALTER TABLE ADD FOREIGN KEY`. If this value is specified without units, it is taken as
+            kilobytes. It defaults to 64 megabytes (`64MB`). Since only one of these operations can be executed at a
+            time by a database session, and an installation normally doesn't have many of them running concurrently,
+            it's safe to set this value significantly larger than `work_mem`. Larger settings might improve performance
+            for vacuuming and for restoring database dumps.
+          - >
+            Note that when `autovacuum` runs, up to `autovacuum_max_workers` times this memory may be allocated, so be
+            careful not to set the default value too high. It may be useful to control for this by separately setting
+            `autovacuum_work_mem`.
+        default: 64MB
+
+      postgresql_autovacuum_work_mem:
+        type: str
+        description: >
+          Specifies the maximum amount of memory to be used by each autovacuum worker process. If this value is
+          specified without units, it is taken as kilobytes. It defaults to -1, indicating that the value of
+          `maintenance_work_mem` should be used instead. The setting has no effect on the behavior of `VACUUM` when run
+          in other contexts. This parameter can only be set in the `postgresql.conf` file or on the server command line.
+        default: "-1"
+
+      postgresql_vacuum_buffer_usage_limit:
+        type: str
+        description: >
+          Specifies the size of the Buffer Access Strategy used by the `VACUUM` and `ANALYZE` commands. A setting of `0`
+          will allow the operation to use any number of `shared_buffers`. Otherwise valid sizes range from `128 kB` to
+          `16 GB`. If the specified size would exceed 1/8 the size of `shared_buffers`, the size is silently capped to
+          that value. The default value is `2MB`. If this value is specified without units, it is taken as kilobytes.
+          This parameter can be set at any time. It can be overridden for `VACUUM` and `ANALYZE` when passing the
+          `BUFFER_USAGE_LIMIT` option. Higher settings can allow `VACUUM` and `ANALYZE` to run more quickly, but having
+          too large a setting may cause too many other useful pages to be evicted from shared buffers.
+        default: 2MB
+
+      postgresql_logical_decoding_work_mem:
+        type: str
+        description:
+          Specifies the maximum amount of memory to be used by logical decoding, before some of the decoded changes are
+          written to local disk. This limits the amount of memory used by logical streaming replication connections. It
+          defaults to 64 megabytes (`64MB`). Since each replication connection only uses a single buffer of this size,
+          and an installation normally doesn't have many such connections concurrently (as limited by
+          `max_wal_senders`), it's safe to set this value significantly higher than `work_mem`, reducing the amount of
+          decoded changes written to disk.
+        default: 64MB
+
+      postgresql_commit_timestamp_buffers:
+        type: str
+        description: >
+          Specifies the amount of memory to use to cache the contents of `pg_commit_ts` (see Table 66.1). If this value
+          is specified without units, it is taken as blocks, that is `BLCKSZ` bytes, typically 8kB. The default value is
+          `0`, which requests `shared_buffers`/512 up to 1024 blocks, but not fewer than 16 blocks. This parameter can
+          only be set at server start.
+        default: "0"
+
+      postgresql_multixact_member_buffers:
+        type: str
+        description: >
+          Specifies the amount of shared memory to use to cache the contents of `pg_multixact/members` (see Table 66.1).
+          If this value is specified without units, it is taken as blocks, that is `BLCKSZ` bytes, typically 8kB. The
+          default value is `32`. This parameter can only be set at server start.
+        default: "32"
+
+      postgresql_multixact_offset_buffers:
+        type: str
+        description: >
+          Specifies the amount of shared memory to use to cache the contents of `pg_multixact/offsets` (see Table 66.1).
+          If this value is specified without units, it is taken as blocks, that is `BLCKSZ` bytes, typically 8kB. The
+          default value is `16`. This parameter can only be set at server start.
+        default: "16"
+
+      postgresql_notify_buffers:
+        type: str
+        description: >
+          Specifies the amount of shared memory to use to cache the contents of `pg_notify` (see Table 66.1). If this
+          value is specified without units, it is taken as blocks, that is `BLCKSZ` bytes, typically 8kB. The default
+          value is `16`. This parameter can only be set at server start.
+        default: "16"
+
+      postgresql_serializable_buffers:
+        type: str
+        description: >
+          Specifies the amount of shared memory to use to cache the contents of `pg_serial` (see Table 66.1). If this
+          value is specified without units, it is taken as blocks, that is `BLCKSZ` bytes, typically 8kB. The default
+          value is 32. This parameter can only be set at server start.
+        default: "32"
+
+      postgresql_subtransaction_buffers:
+        type: str
+        description: >
+          Specifies the amount of shared memory to use to cache the contents of `pg_subtrans` (see Table 66.1). If this
+          value is specified without units, it is taken as blocks, that is `BLCKSZ` bytes, typically 8kB. The default
+          value is 0, which requests `shared_buffers`/512 up to 1024 blocks, but not fewer than 16 blocks. This
+          parameter can only be set at server start.
+        default: "0"
+
+      postgresql_transaction_buffers:
+        type: str
+        description: >
+          Specifies the amount of shared memory to use to cache the contents of `pg_xact` (see Table 66.1). If this
+          value is specified without units, it is taken as blocks, that is `BLCKSZ` bytes, typically 8kB. The default
+          value is 0, which requests `shared_buffers`/512 up to 1024 blocks, but not fewer than 16 blocks. This
+          parameter can only be set at server start.
+        default: "0"
+
+      postgresql_max_stack_depth:
+        type: str
+        description:
+          - >
+            Specifies the maximum safe depth of the server's execution stack. The ideal setting for this parameter is
+            the actual stack size limit enforced by the kernel (as set by `ulimit -s` or local equivalent), less a
+            safety margin of a megabyte or so. The safety margin is needed because the stack depth is not checked in
+            every routine in the server, but only in key potentially-recursive routines. If this value is specified
+            without units, it is taken as kilobytes. The default setting is two megabytes (`2MB`), which is
+            conservatively small and unlikely to risk crashes. However, it might be too small to allow execution of
+            complex functions. Only superusers and users with the appropriate `SET` privilege can change this setting.
+          - >
+            Setting max_stack_depth higher than the actual kernel limit will mean that a runaway recursive function can
+            crash an individual backend process. On platforms where PostgreSQL can determine the kernel limit, the
+            server will not allow this variable to be set to an unsafe value. However, not all platforms provide the
+            information, so caution is recommended in selecting a value.
+        default: 2MB
+
+      postgresql_shared_memory_type:
+        type: str
+        choices:
+          - mmap
+          - sysv
+          - windows
+        description: >
+          Specifies the shared memory implementation that the server should use for the main shared memory region that
+          holds PostgreSQL's shared buffers and other shared data. Possible values are `mmap` (for anonymous shared
+          memory allocated using `mmap`), `sysv` (for System V shared memory allocated via `shmget`) and `windows` (for
+          Windows shared memory). Not all values are supported on all platforms; the first supported option is the
+          default for that platform. The use of the `sysv` option, which is not the default on any platform, is
+          generally discouraged because it typically requires non-default kernel settings to allow for large allocations
+          (see Section 18.4.1). This parameter can only be set at server start.
+        default: mmap
+
+      postgresql_dynamic_shared_memory_type:
+        type: str
+        choices:
+          - posix
+          - sysv
+          - windows
+          - mmap
+        description: >
+          Specifies the dynamic shared memory implementation that the server should use. Possible values are `posix`
+          (for POSIX shared memory allocated using `shm_open`), `sysv` (for System V shared memory allocated via
+          `shmget`), `windows` (for Windows shared memory), and `mmap` (to simulate shared memory using memory-mapped
+          files stored in the data directory). Not all values are supported on all platforms; the first supported option
+          is usually the default for that platform. The use of the `mmap` option, which is not the default on any
+          platform, is generally discouraged because the operating system may write modified pages back to disk
+          repeatedly, increasing system I/O load; however, it may be useful for debugging, when the `pg_dynshmem`
+          directory is stored on a RAM disk, or when other shared memory facilities are not available. This parameter
+          can only be set at server start.
+        default: posix
+
+      postgresql_min_dynamic_shared_memory:
+        type: str
+        description: >
+          Specifies the amount of memory that should be allocated at server startup for use by parallel queries. When
+          this memory region is insufficient or exhausted by concurrent queries, new parallel queries try to allocate
+          extra shared memory temporarily from the operating system using the method configured with
+          `dynamic_shared_memory_type`, which may be slower due to memory management overheads. Memory that is allocated
+          at startup with `min_dynamic_shared_memory` is affected by the `huge_pages` setting on operating systems where
+          that is supported, and may be more likely to benefit from larger pages on operating systems where that is
+          managed automatically. The default value is `0` (none). This parameter can only be set at server start.
+        default: "0"
+
+      postgresql_temp_file_limit:
+        type: str
+        description:
+          - >
+            Specifies the maximum amount of disk space that a process can use for temporary files, such as sort and hash
+            temporary files, or the storage file for a held cursor. A transaction attempting to exceed this limit will
+            be canceled. If this value is specified without units, it is taken as kilobytes. `-1` (the default) means no
+            limit. Only superusers and users with the appropriate `SET` privilege can change this setting.
+          - >
+            This setting constrains the total space used at any instant by all temporary files used by a given
+            PostgreSQL process. It should be noted that disk space used for explicit temporary tables, as opposed to
+            temporary files used behind-the-scenes in query execution, does not count against this limit.
+        default: "-1"
+
+      postgresql_file_copy_method:
+        type: str
+        choices:
+          - copy
+          - clone
+        description:
+          - >
+            Specifies the method used to copy files. Possible values are `COPY` (default) and `CLONE` (if operating
+            support is available).
+          - >
+            This parameter affects: `CREATE DATABASE ... STRATEGY=FILE_COPY`, `ALTER DATABASE ... SET TABLESPACE ...`
+          - >
+            `CLONE` uses the `copy_file_range()` (Linux, FreeBSD) or `copyfile` (macOS) system calls, giving the kernel
+            the opportunity to share disk blocks or push work down to lower layers on some file systems.
+        default: copy
+
+      postgresql_file_extend_method:
+        type: str
+        choices:
+          - posix_fallocate
+          - write_zeros
+        description:
+          - >
+            Specifies the method used to extend data files during bulk operations such as `COPY`. The first available
+            option is used as the default, depending on the operating system:
+          - >
+            `posix_fallocate` (Unix) uses the standard POSIX interface for allocating disk space, but is missing on some
+            systems. If it is present but the underlying file system doesn't support it, this option silently falls back
+            to `write_zeros`. Current versions of BTRFS are known to disable compression when this option is used. This
+            is the default on systems that have the function.
+          - >
+            `write_zeros` extends files by writing out blocks of zero bytes. This is the default on systems that don't
+            have the function `posix_fallocate`.
+          - >
+            The write_zeros method is always used when data files are extended by 8 blocks or fewer.
+        default: posix_fallocate
+
+      postgresql_max_notify_queue_pages:
+        type: int
+        description: >
+          Specifies the maximum amount of allocated pages for NOTIFY / LISTEN queue. The default value is 1048576.
+          For 8 KB pages it allows to consume up to 8 GB of disk space. This parameter can only be set at server start.
+        default: 1048576

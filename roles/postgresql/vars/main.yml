@@ -1,0 +1,9 @@
+---
+__postgresql_required_facts:
+  - architecture
+  - distribution
+  - distribution_major_version
+  - distribution_version
+  - os_family
+
+__postgresql_user: postgres

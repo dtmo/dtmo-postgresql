@@ -1,0 +1,31 @@
+- name: Add PostgreSQL APT repository
+  become: true
+  ansible.builtin.deb822_repository:
+    name: redis
+    types:
+      - deb
+      - deb-src
+    uris:
+      - https://apt.postgresql.org/pub/repos/apt
+    suites:
+      - "{{ ansible_facts.distribution_release }}-pgdg"
+    architectures:
+      - "{{ __postgresql_architecture }}"
+    components:
+      - main
+    signed_by: https://www.postgresql.org/media/keys/ACCC4CF8.asc
+    install_python_debian: true
+
+- name: Install PostgreSQL
+  become: true
+  ansible.builtin.package:
+    name:
+      - postgresql-{{ postgresql_version }}
+    state: present
+
+- name: Enable PostgreSQL service
+  become: true
+  ansible.builtin.systemd_service:
+    name: "{{ __postgresql_service_name }}"
+    enabled: true
+  notify: Restart PostgreSQL
