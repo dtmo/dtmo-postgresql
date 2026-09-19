@@ -146,14 +146,12 @@ argument_specs:
             requests on insecure network interfaces. This parameter can only be set at server start.
         type: list
         elements: str
-        default: localhost
 
       postgresql_port:
         description: >-
           The TCP port the server listens on; 5432 by default. Note that the same port number is used for all IP
           addresses the server listens on. This parameter can only be set at server start.
         type: int
-        default: 5432
 
       postgresql_max_connections:
         description:
@@ -183,7 +181,6 @@ argument_specs:
             The default value is zero connections. The value must be less than `max_connections` minus
             `superuser_reserved_connections`. This parameter can only be set at server start.
         type: int
-        default: 0
 
       postgresql_superuser_reserved_connections:
         description:
@@ -197,7 +194,6 @@ argument_specs:
             The default value is three connections. The value must be less than `max_connections` minus
             `reserved_connections`. This parameter can only be set at server start.
         type: int
-        default: 3
 
       postgresql_unix_socket_directories:
         description:
@@ -222,7 +218,6 @@ argument_specs:
             file is created.
         type: list
         elements: path
-        default: ["/run/postgresql"]
 
       postgresql_unix_socket_group:
         description:
@@ -235,7 +230,6 @@ argument_specs:
             This parameter is not supported on Windows. Any setting will be ignored. Also, sockets in the abstract
             namespace have no file owner, so this setting is also ignored in that case.
         type: str
-        default: ""
 
       postgresql_unix_socket_permissions:
         description:
@@ -256,14 +250,12 @@ argument_specs:
             having search permission limited to the desired audience.
           - Sockets in the abstract namespace have no file permissions, so this setting is also ignored in that case.
         type: str
-        default: "0777"
 
       postgresql_bonjour:
         description: >-
           Enables advertising the server's existence via Bonjour. The default is off. This parameter can only be set at
           server start.
         type: bool
-        default: false
 
       postgresql_bonjour_name:
         description: >-
@@ -271,7 +263,6 @@ argument_specs:
           `''` (which is the default). This parameter is ignored if the server was not compiled with Bonjour support.
           This parameter can only be set at server start.
         type: str
-        default: ""
 
       postgresql_tcp_keepalives_idle:
         description: >-
@@ -283,7 +274,6 @@ argument_specs:
           systems, it must be zero. In sessions connected via a Unix-domain socket, this parameter is ignored and always
           reads as zero.
         type: int
-        default: 0
 
       postgresql_tcp_keepalives_interval:
         description: >-
@@ -295,7 +285,6 @@ argument_specs:
           it must be zero. In sessions connected via a Unix-domain socket, this parameter is ignored and always reads as
           zero.
         type: int
-        default: 0
 
       postgresql_tcp_keepalives_count:
         description: >-
@@ -305,7 +294,6 @@ argument_specs:
           Windows); on other systems, it must be zero. In sessions connected via a Unix-domain socket, this parameter is
           ignored and always reads as zero.
         type: int
-        default: 0
 
       postgresql_tcp_user_timeout:
         description: >-
@@ -315,7 +303,6 @@ argument_specs:
           `TCP_USER_TIMEOUT` (which does not include Windows); on other systems, it must be zero. In sessions connected
           via a Unix-domain socket, this parameter is ignored and always reads as zero.
         type: int
-        default: 0
 
       postgresql_client_connection_check_interval:
         description:
@@ -335,7 +322,6 @@ argument_specs:
             including network failure, it may also be necessary to adjust the TCP keepalive settings of the operating
             system, or the tcp_keepalives_idle, tcp_keepalives_interval and tcp_keepalives_count settings of PostgreSQL.
         type: int
-        default: 0
 
       postgresql_authentication_timeout:
         description: >-
@@ -345,7 +331,6 @@ argument_specs:
           default is one minute (`1m`). This parameter can only be set in the `postgresql.conf` file or on the server
           command line.
         type: str
-        default: 1min
 
       postgresql_password_encryption:
         description:
@@ -363,7 +348,6 @@ argument_specs:
         choices:
           - scram-sha-256
           - md5
-        default: scram-sha-256
 
       postgresql_scram_iterations:
         description:
@@ -380,14 +364,12 @@ argument_specs:
             find this concerning, ensure that all role passwords are created with scram_iterations set to the value
             specified in the `postgresql.conf` file or on the server command line.
         type: int
-        default: 4096
 
       postgresql_md5_password_warnings:
         description: >-
           Controls whether a `WARNING` about MD5 password deprecation is produced when a `CREATE ROLE` or `ALTER ROLE`
           statement sets an MD5-encrypted password.
         type: bool
-        default: true
 
       postgresql_krb_server_keyfile:
         type: str
@@ -404,7 +386,6 @@ argument_specs:
         description: >-
           Sets whether GSSAPI user names should be treated case-insensitively. The default is off (case sensitive). This
           parameter can only be set in the `postgresql.conf` file or on the server command line.
-        default: false
 
       postgresql_gss_accept_delegation:
         type: bool
@@ -412,7 +393,6 @@ argument_specs:
           Sets whether GSSAPI delegation should be accepted from the client. The default is off meaning credentials from
           the client will not be accepted. Changing this to on will make the server accept credentials delegated to it
           from the client. This parameter can only be set in the `postgresql.conf` file or on the server command line.
-        default: false
 
       postgresql_oauth_validator_libraries:
         type: str
@@ -425,14 +405,12 @@ argument_specs:
           - >-
             Validator modules must be implemented/obtained separately; PostgreSQL does not ship with any default
             implementations. For more information on implementing OAuth validators, see Chapter 50.
-        default: ""
 
       postgresql_ssl:
         type: bool
         description: >-
           Enables SSL connections. This parameter can only be set in the `postgresql.conf` file or on the server command
           line. The default is off.
-        default: false
 
       postgresql_ssl_ca_file:
         type: str
@@ -441,7 +419,6 @@ argument_specs:
           relative to the data directory. This parameter can only be set in the `postgresql.conf` file or on the server
           command line. The default is empty, meaning no CA file is loaded, and client certificate verification is not
           performed.
-        default: ""
 
       postgresql_ssl_cert_file:
         type: path
@@ -449,7 +426,6 @@ argument_specs:
           Specifies the name of the file containing the SSL server certificate. Relative paths are relative to the data
           directory. This parameter can only be set in the `postgresql.conf` file or on the server command line. The
           default is `server.crt`.
-        default: server.crt
 
       postgresql_ssl_crl_file:
         type: path
@@ -457,7 +433,6 @@ argument_specs:
           Specifies the name of the file containing the SSL client certificate revocation list (CRL). Relative paths are
           relative to the data directory. This parameter can only be set in the `postgresql.conf` file or on the server
           command line. The default is empty, meaning no CRL file is loaded (unless ssl_crl_dir is set).
-        default: ""
 
       postgresql_ssl_crl_dir:
         type: path
@@ -474,7 +449,6 @@ argument_specs:
             can be added to the directory and will be used immediately. This is unlike ssl_crl_file, which causes the
             CRL in the file to be loaded at server start time or when the configuration is reloaded. Both settings can
             be used together.
-        default: ""
 
       postgresql_ssl_key_file:
         type: path
@@ -482,7 +456,6 @@ argument_specs:
           Specifies the name of the file containing the SSL server private key. Relative paths are relative to the data
           directory. This parameter can only be set in the `postgresql.conf` file or on the server command line. The
           default is `server.key`.
-        default: server.key
 
       postgresql_ssl_tls13_ciphers:
         type: list
@@ -494,7 +467,6 @@ argument_specs:
             OpenSSL will be used.
           - >-
             This parameter can only be set in the `postgresql.conf` file or on the server command line.
-        default: []
 
       postgresql_ssl_ciphers:
         type: list
@@ -522,7 +494,6 @@ argument_specs:
             Available cipher suite details will vary across OpenSSL versions. Use the command
             `openssl ciphers -v 'HIGH:MEDIUM:+3DES:!aNULL'` to see actual details for the currently installed OpenSSL
             version. Note that this list is filtered at run time based on the server key type.
-        default: ["HIGH", "MEDIUM", "+3DES", "!aNULL"]
 
       postgresql_ssl_prefer_server_ciphers:
         type: bool
@@ -534,7 +505,6 @@ argument_specs:
             PostgreSQL versions before 9.4 do not have this setting and always use the client's preferences.
             This setting is mainly for backward compatibility with those versions. Using the server's preferences is
             usually better because it is more likely that the server is appropriately configured.
-        default: true
 
       postgresql_ssl_groups:
         type: list
@@ -552,7 +522,6 @@ argument_specs:
             and aliases are omitted.
           - >-
             In PostgreSQL versions before 18.0 this setting was named `ssl_ecdh_curve` and only accepted a single value.
-        default: ["X25519", "prime256v1"]
 
       postgresql_ssl_min_protocol_version:
         type: str
@@ -571,7 +540,6 @@ argument_specs:
             The default is `TLSv1.2`, which satisfies industry best practices as of this writing.
           - >-
             This parameter can only be set in the `postgresql.conf` file or on the server command line.
-        default: TLSv1.2
 
       postgresql_ssl_max_protocol_version:
         type: str
@@ -589,7 +557,6 @@ argument_specs:
             newer protocol.
           - >-
             This parameter can only be set in the `postgresql.conf` file or on the server command line.
-        default: ""
 
       postgresql_ssl_dh_params_file:
         type: path
@@ -601,7 +568,6 @@ argument_specs:
             You can create your own DH parameters file with the command `openssl dhparam -out dhparams.pem 2048`.
           - >-
             This parameter can only be set in the `postgresql.conf` file or on the server command line.
-        default: ""
 
       postgresql_ssl_passphrase_command:
         type: str
@@ -621,7 +587,6 @@ argument_specs:
             adequately secure.
           - >-
             This parameter can only be set in the `postgresql.conf` file or on the server command line.
-        default: ""
 
       postgresql_ssl_passphrase_command_supports_reload:
         type: bool
@@ -638,7 +603,6 @@ argument_specs:
             reload due to the different process model of that platform.
           - >-
             This parameter can only be set in the `postgresql.conf` file or on the server command line.
-        default: false
 
       postgresql_shared_buffers:
         type: str
@@ -695,7 +659,6 @@ argument_specs:
             memory allocation, without an explicit request from PostgreSQL. On Linux, this is called “transparent huge
             pages” (THP). That feature has been known to cause performance degradation with PostgreSQL for some users on
             some Linux versions, so its use is currently discouraged (unlike explicit use of `huge_pages`).
-        default: try
 
       postgresql_huge_page_size:
         type: str
@@ -709,7 +672,6 @@ argument_specs:
             AMD), `16MB` and `16GB` (IBM POWER), and `64kB`, `2MB`, `32MB` and `1GB` (ARM). For more information about
             usage and support, see Section 18.4.5.
           - Non-default settings are currently supported only on Linux.
-        default: "0"
 
       postgresql_temp_buffers:
         type: str
@@ -726,7 +688,6 @@ argument_specs:
             setting a large value in sessions that do not actually need many temporary buffers is only a buffer
             descriptor, or about 64 bytes, per increment in `temp_buffers`. However if a buffer is actually used an
             additional 8192 bytes will be consumed for it (or in general, `BLCKSZ` bytes).
-        default: 8MB
 
       postgresql_max_prepared_transactions:
         type: int
@@ -743,7 +704,6 @@ argument_specs:
           - >-
             When running a standby server, you must set this parameter to the same or higher value than on the primary
             server. Otherwise, queries will not be allowed in the standby server.
-        default: 0
 
       postgresql_work_mem:
         type: str
@@ -763,7 +723,6 @@ argument_specs:
             operations. The memory limit for a hash table is computed by multiplying `work_mem` by
             `hash_mem_multiplier`. This makes it possible for hash-based operations to use an amount of memory that
             exceeds the usual `work_mem` base amount.
-        default: 4MB
 
       postgresql_hash_mem_multiplier:
         type: float
@@ -778,7 +737,6 @@ argument_specs:
             typically takes the form of intermittent out of memory errors). The default setting of 2.0 is often
             effective with mixed workloads. Higher settings in the range of 2.0 - 8.0 or more may be effective in
             environments where `work_mem` has already been increased to 40MB or more.
-        default: 2.0
 
       postgresql_maintenance_work_mem:
         type: str
@@ -794,7 +752,6 @@ argument_specs:
             Note that when `autovacuum` runs, up to `autovacuum_max_workers` times this memory may be allocated, so be
             careful not to set the default value too high. It may be useful to control for this by separately setting
             `autovacuum_work_mem`.
-        default: 64MB
 
       postgresql_autovacuum_work_mem:
         type: str
@@ -803,7 +760,6 @@ argument_specs:
           specified without units, it is taken as kilobytes. It defaults to -1, indicating that the value of
           `maintenance_work_mem` should be used instead. The setting has no effect on the behavior of `VACUUM` when run
           in other contexts. This parameter can only be set in the `postgresql.conf` file or on the server command line.
-        default: "-1"
 
       postgresql_vacuum_buffer_usage_limit:
         type: str
@@ -815,7 +771,6 @@ argument_specs:
           This parameter can be set at any time. It can be overridden for `VACUUM` and `ANALYZE` when passing the
           `BUFFER_USAGE_LIMIT` option. Higher settings can allow `VACUUM` and `ANALYZE` to run more quickly, but having
           too large a setting may cause too many other useful pages to be evicted from shared buffers.
-        default: 2MB
 
       postgresql_logical_decoding_work_mem:
         type: str
@@ -826,7 +781,6 @@ argument_specs:
           and an installation normally doesn't have many such connections concurrently (as limited by
           `max_wal_senders`), it's safe to set this value significantly higher than `work_mem`, reducing the amount of
           decoded changes written to disk.
-        default: 64MB
 
       postgresql_commit_timestamp_buffers:
         type: str
@@ -835,7 +789,6 @@ argument_specs:
           is specified without units, it is taken as blocks, that is `BLCKSZ` bytes, typically 8kB. The default value is
           `0`, which requests `shared_buffers`/512 up to 1024 blocks, but not fewer than 16 blocks. This parameter can
           only be set at server start.
-        default: "0"
 
       postgresql_multixact_member_buffers:
         type: str
@@ -843,7 +796,6 @@ argument_specs:
           Specifies the amount of shared memory to use to cache the contents of `pg_multixact/members` (see Table 66.1).
           If this value is specified without units, it is taken as blocks, that is `BLCKSZ` bytes, typically 8kB. The
           default value is `32`. This parameter can only be set at server start.
-        default: "32"
 
       postgresql_multixact_offset_buffers:
         type: str
@@ -851,7 +803,6 @@ argument_specs:
           Specifies the amount of shared memory to use to cache the contents of `pg_multixact/offsets` (see Table 66.1).
           If this value is specified without units, it is taken as blocks, that is `BLCKSZ` bytes, typically 8kB. The
           default value is `16`. This parameter can only be set at server start.
-        default: "16"
 
       postgresql_notify_buffers:
         type: str
@@ -859,7 +810,6 @@ argument_specs:
           Specifies the amount of shared memory to use to cache the contents of `pg_notify` (see Table 66.1). If this
           value is specified without units, it is taken as blocks, that is `BLCKSZ` bytes, typically 8kB. The default
           value is `16`. This parameter can only be set at server start.
-        default: "16"
 
       postgresql_serializable_buffers:
         type: str
@@ -867,7 +817,6 @@ argument_specs:
           Specifies the amount of shared memory to use to cache the contents of `pg_serial` (see Table 66.1). If this
           value is specified without units, it is taken as blocks, that is `BLCKSZ` bytes, typically 8kB. The default
           value is 32. This parameter can only be set at server start.
-        default: "32"
 
       postgresql_subtransaction_buffers:
         type: str
@@ -876,7 +825,6 @@ argument_specs:
           value is specified without units, it is taken as blocks, that is `BLCKSZ` bytes, typically 8kB. The default
           value is 0, which requests `shared_buffers`/512 up to 1024 blocks, but not fewer than 16 blocks. This
           parameter can only be set at server start.
-        default: "0"
 
       postgresql_transaction_buffers:
         type: str
@@ -885,7 +833,6 @@ argument_specs:
           value is specified without units, it is taken as blocks, that is `BLCKSZ` bytes, typically 8kB. The default
           value is 0, which requests `shared_buffers`/512 up to 1024 blocks, but not fewer than 16 blocks. This
           parameter can only be set at server start.
-        default: "0"
 
       postgresql_max_stack_depth:
         type: str
@@ -903,7 +850,6 @@ argument_specs:
             crash an individual backend process. On platforms where PostgreSQL can determine the kernel limit, the
             server will not allow this variable to be set to an unsafe value. However, not all platforms provide the
             information, so caution is recommended in selecting a value.
-        default: 2MB
 
       postgresql_shared_memory_type:
         type: str
@@ -919,7 +865,6 @@ argument_specs:
           default for that platform. The use of the `sysv` option, which is not the default on any platform, is
           generally discouraged because it typically requires non-default kernel settings to allow for large allocations
           (see Section 18.4.1). This parameter can only be set at server start.
-        default: mmap
 
       postgresql_dynamic_shared_memory_type:
         type: str
@@ -950,7 +895,6 @@ argument_specs:
           at startup with `min_dynamic_shared_memory` is affected by the `huge_pages` setting on operating systems where
           that is supported, and may be more likely to benefit from larger pages on operating systems where that is
           managed automatically. The default value is `0` (none). This parameter can only be set at server start.
-        default: "0"
 
       postgresql_temp_file_limit:
         type: str
@@ -980,7 +924,6 @@ argument_specs:
           - >-
             `CLONE` uses the `copy_file_range()` (Linux, FreeBSD) or `copyfile` (macOS) system calls, giving the kernel
             the opportunity to share disk blocks or push work down to lower layers on some file systems.
-        default: copy
 
       postgresql_file_extend_method:
         type: str
@@ -1001,14 +944,12 @@ argument_specs:
             have the function `posix_fallocate`.
           - >-
             The write_zeros method is always used when data files are extended by 8 blocks or fewer.
-        default: posix_fallocate
 
       postgresql_max_notify_queue_pages:
         type: int
         description: >-
           Specifies the maximum amount of allocated pages for NOTIFY / LISTEN queue. The default value is 1048576.
           For 8 KB pages it allows to consume up to 8 GB of disk space. This parameter can only be set at server start.
-        default: 1048576
 
       postgresql_max_files_per_process:
         type: int
@@ -1022,7 +963,6 @@ argument_specs:
             than the system can actually support if many processes all try to open that many files. If you find yourself
             seeing “Too many open files” failures, try reducing this setting. This parameter can only be set at server
             start.
-        default: 1000
 
       postgresql_bgwriter_delay:
         type: str
@@ -1035,7 +975,6 @@ argument_specs:
           resolution of sleep delays is 10 milliseconds; setting `bgwriter_delay` to a value that is not a multiple of
           10 might have the same results as setting it to the next higher multiple of 10. This parameter can only be set
           in the `postgresql.conf` file or on the server command line.
-        default: 200ms
 
       postgresql_bgwriter_lru_maxpages:
         type: int
@@ -1044,7 +983,6 @@ argument_specs:
           disables background writing. (Note that checkpoints, which are managed by a separate, dedicated auxiliary
           process, are unaffected.) The default value is 100 buffers. This parameter can only be set in the
           `postgresql.conf` file or on the server command line.
-        default: 100
 
       postgresql_bgwriter_lru_multiplier:
         type: float
@@ -1057,7 +995,6 @@ argument_specs:
           policy of writing exactly the number of buffers predicted to be needed. Larger values provide some cushion
           against spikes in demand, while smaller values intentionally leave writes to be done by server processes. The
           default is 2.0. This parameter can only be set in the `postgresql.conf` file or on the server command line.
-        default: 2.0
 
       postgresql_bgwriter_flush_after:
         type: str
@@ -1073,4 +1010,3 @@ argument_specs:
           is `512kB` on Linux, `0` elsewhere. (If `BLCKSZ` is not 8kB, the default and maximum values scale
           proportionally to it.) This parameter can only be set in the `postgresql.conf` file or on the server command
           line.
-        default: 512kB
