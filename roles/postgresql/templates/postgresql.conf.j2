@@ -275,15 +275,23 @@ max_notify_queue_pages = {{ postgresql_max_notify_queue_pages }}
 
 # - Kernel Resources -
 
-#max_files_per_process = 1000		# min 64
-					# (change requires restart)
+# min 64
+# (change requires restart)
+max_files_per_process = {{ postgresql_max_files_per_process }}
 
 # - Background Writer -
 
-#bgwriter_delay = 200ms			# 10-10000ms between rounds
-#bgwriter_lru_maxpages = 100		# max buffers written/round, 0 disables
-#bgwriter_lru_multiplier = 2.0		# 0-10.0 multiplier on buffers scanned/round
-#bgwriter_flush_after = 512kB		# measured in pages, 0 disables
+# 10-10000ms between rounds
+bgwriter_delay = {{ postgresql_bgwriter_delay }}
+
+# max buffers written/round, 0 disables
+bgwriter_lru_maxpages = {{ postgresql_bgwriter_lru_maxpages }}
+
+# 0-10.0 multiplier on buffers scanned/round
+bgwriter_lru_multiplier = {{ postgresql_bgwriter_lru_multiplier }}
+
+# measured in pages, 0 disables
+bgwriter_flush_after = {{ postgresql_bgwriter_flush_after }}
 
 # - I/O -
 

@@ -82,3 +82,10 @@ postgresql_temp_file_limit: "-1"
 postgresql_file_copy_method: copy
 postgresql_file_extend_method: posix_fallocate
 postgresql_max_notify_queue_pages: 1048576
+
+postgresql_max_files_per_process: 1000
+
+postgresql_bgwriter_delay: 200ms
+postgresql_bgwriter_lru_maxpages: 100
+postgresql_bgwriter_lru_multiplier: 2.0
+postgresql_bgwriter_flush_after: 512kB
