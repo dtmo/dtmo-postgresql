@@ -295,29 +295,51 @@
 
 # - I/O -
 
-#backend_flush_after = 0		# measured in pages, 0 disables
-#effective_io_concurrency = 16		# 1-1000; 0 disables issuing multiple simultaneous IO requests
-#maintenance_io_concurrency = 16	# 1-1000; same as effective_io_concurrency
-#io_max_combine_limit = 128kB		# usually 1-128 blocks (depends on OS)
-					# (change requires restart)
-#io_combine_limit = 128kB		# usually 1-128 blocks (depends on OS)
+# measured in pages, 0 disables
+{{ '#' if postgresql_backend_flush_after is not defined -}} backend_flush_after = {{ postgresql_backend_flush_after | default(0) }}
 
-#io_method = worker			# worker, io_uring, sync
-					# (change requires restart)
-#io_max_concurrency = -1		# Max number of IOs that one process
-					# can execute simultaneously
-					# -1 sets based on shared_buffers
-					# (change requires restart)
-#io_workers = 3				# 1-32;
+# 1-1000; 0 disables issuing multiple simultaneous IO requests
+{{ '#' if postgresql_effective_io_concurrency is not defined -}} effective_io_concurrency = {{ postgresql_effective_io_concurrency | default(16) }}
+
+# 1-1000; same as effective_io_concurrency
+{{ '#' if postgresql_maintenance_io_concurrency is not defined -}} maintenance_io_concurrency = {{ postgresql_maintenance_io_concurrency | default(16) }}
+
+# usually 1-128 blocks (depends on OS)
+# (change requires restart)
+{{ '#' if postgresql_io_max_combine_limit is not defined -}} io_max_combine_limit = {{ postgresql_io_max_combine_limit | default("128kB") }}
+
+# usually 1-128 blocks (depends on OS)
+{{ '#' if postgresql_io_combine_limit is not defined -}} io_combine_limit = {{ postgresql_io_combine_limit | default("128kB") }}
+
+# worker, io_uring, sync
+# (change requires restart)
+{{ '#' if postgresql_io_method is not defined -}} io_method = {{ postgresql_io_method | default("worker") }}
+
+# Max number of IOs that one process
+# can execute simultaneously
+# -1 sets based on shared_buffers
+# (change requires restart)
+{{ '#' if postgresql_io_max_concurrency is not defined -}} io_max_concurrency = {{ postgresql_io_max_concurrency | default(-1) }}
+
+# 1-32;
+{{ '#' if postgresql_io_workers is not defined -}} io_workers = {{ postgresql_io_workers | default(3) }}
 
 # - Worker Processes -
 
-#max_worker_processes = 8		# (change requires restart)
-#max_parallel_workers_per_gather = 2	# limited by max_parallel_workers
-#max_parallel_maintenance_workers = 2	# limited by max_parallel_workers
-#max_parallel_workers = 8		# number of max_worker_processes that
-					# can be used in parallel operations
-#parallel_leader_participation = on
+# (change requires restart)
+{{ '#' if postgresql_max_worker_processes is not defined -}} max_worker_processes = {{ postgresql_max_worker_processes | default(8) }}
+
+# limited by max_parallel_workers
+{{ '#' if postgresql_max_parallel_workers_per_gather is not defined -}} max_parallel_workers_per_gather = {{ postgresql_max_parallel_workers_per_gather | default(2) }}
+
+# limited by max_parallel_workers
+{{ '#' if postgresql_max_parallel_maintenance_workers is not defined -}} max_parallel_maintenance_workers = {{ postgresql_max_parallel_maintenance_workers | default (2) }}
+
+# number of max_worker_processes that
+# can be used in parallel operations
+{{ '#' if postgresql_max_parallel_workers is not defined -}} max_parallel_workers = {{ postgresql_max_parallel_workers | default(8) }}
+
+{{ '#' if postgresql_parallel_leader_participation is not defined -}} parallel_leader_participation = {{ "on" if (postgresql_parallel_leader_participation | default(true)) else "off" }}
 
 
 #------------------------------------------------------------------------------
