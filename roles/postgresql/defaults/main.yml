@@ -17,3 +17,5 @@ postgresql_authentication_records:
 postgresql_max_connections: 100
 postgresql_shared_buffers: 128MB
 postgresql_dynamic_shared_memory_type: posix
+postgresql_max_wal_size: 1GB
+postgresql_min_wal_size: 80MB

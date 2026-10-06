@@ -57,81 +57,47 @@
 
 # - Connection Settings -
 
-# what IP address(es) to listen on;
-# comma-separated list of addresses;
-# defaults to 'localhost'; use '*' for all
-# (change requires restart)
-{{ '#' if postgresql_listen_addresses is not defined -}} listen_addresses = '{{ (postgresql_listen_addresses | default(["localhost"])) | join(",") }}'
-
-# (change requires restart)
-{{ '#' if postgresql_port is not defined -}} port = {{ postgresql_port | default(5432) }}
-
-# (change requires restart)
-{{ '#' if postgresql_max_connections is not defined -}} max_connections = {{ postgresql_max_connections | default(100) }}
-
-# (change requires restart)
-{{ '#' if postgresql_reserved_connections is not defined -}} reserved_connections = {{ postgresql_reserved_connections | default(0) }}
-
-# (change requires restart)
-{{ '#' if postgresql_superuser_reserved_connections is not defined -}} superuser_reserved_connections = {{ postgresql_superuser_reserved_connections | default(3) }}
-
-# comma-separated list of directories
-# (change requires restart)
-{{ '#' if postgresql_unix_socket_directories is not defined -}} unix_socket_directories = '{{ (postgresql_unix_socket_directories | default(["/run/postgresql"])) | map('to_json') | join(",") }}'
-
-# (change requires restart)
-{{ '#' if postgresql_unix_socket_group is not defined -}} unix_socket_group = '{{ postgresql_unix_socket_group | default("") }}'
-
-# (change requires restart)
-{{ '#' if postgresql_unix_socket_permissions is not defined -}} unix_socket_permissions = {{ postgresql_unix_socket_permissions | default("0777") }}
-
-# advertise server via Bonjour
-# (change requires restart)
-{{ '#' if postgresql_bonjour is not defined -}} bonjour = {{ 'on' if (postgresql_bonjour | default(false)) else 'off' }}
-
-# defaults to the computer name
-# (change requires restart)
-{{ '#' if postgresql_bonjour_name is not defined -}} bonjour_name = '{{ postgresql_bonjour_name | default("") }}'
+{{ '#' if postgresql_listen_addresses is not defined -}} listen_addresses = '{{ (postgresql_listen_addresses | default(["localhost"])) | join(",") }}'		# what IP address(es) to listen on;
+					# comma-separated list of addresses;
+					# defaults to 'localhost'; use '*' for all
+					# (change requires restart)
+{{ '#' if postgresql_port is not defined -}} port = {{ postgresql_port | default(5432) }}				# (change requires restart)
+{{ '#' if postgresql_max_connections is not defined -}} max_connections = {{ postgresql_max_connections | default(100) }}			# (change requires restart)
+{{ '#' if postgresql_reserved_connections is not defined -}} reserved_connections = {{ postgresql_reserved_connections | default(0) }}		# (change requires restart)
+{{ '#' if postgresql_superuser_reserved_connections is not defined -}} superuser_reserved_connections = {{ postgresql_superuser_reserved_connections | default(3) }}	# (change requires restart)
+{{ '#' if postgresql_unix_socket_directories is not defined -}} unix_socket_directories = '{{ (postgresql_unix_socket_directories | default(["/run/postgresql"])) | map('to_json') | join(",") }}' # comma-separated list of directories
+					# (change requires restart)
+{{ '#' if postgresql_unix_socket_group is not defined -}} unix_socket_group = '{{ postgresql_unix_socket_group | default("") }}'			# (change requires restart)
+{{ '#' if postgresql_unix_socket_permissions is not defined -}} unix_socket_permissions = {{ postgresql_unix_socket_permissions | default("0777") }}		# begin with 0 to use octal notation
+					# (change requires restart)
+{{ '#' if postgresql_bonjour is not defined -}} bonjour = {{ 'on' if (postgresql_bonjour | default(false)) else 'off' }}				# advertise server via Bonjour
+					# (change requires restart)
+{{ '#' if postgresql_bonjour_name is not defined -}} bonjour_name = '{{ postgresql_bonjour_name | default("") }}'			# defaults to the computer name
+					# (change requires restart)
 
 # - TCP settings -
 # see "man tcp" for details
 
-# TCP_KEEPIDLE, in seconds;
-# 0 selects the system default
-{{ '#' if postgresql_tcp_keepalives_idle is not defined -}} tcp_keepalives_idle = {{ postgresql_tcp_keepalives_idle | default(0) }}
+{{ '#' if postgresql_tcp_keepalives_idle is not defined -}} tcp_keepalives_idle = {{ postgresql_tcp_keepalives_idle | default(0) }}		# TCP_KEEPIDLE, in seconds;
+					# 0 selects the system default
+{{ '#' if postgresql_tcp_keepalives_interval is not defined -}} tcp_keepalives_interval = {{ postgresql_tcp_keepalives_interval | default(0) }}		# TCP_KEEPINTVL, in seconds;
+					# 0 selects the system default
+{{ '#' if postgresql_tcp_keepalives_count is not defined -}} tcp_keepalives_count = {{ postgresql_tcp_keepalives_count | default(0) }}		# TCP_KEEPCNT;
+					# 0 selects the system default
+{{ '#' if postgresql_tcp_user_timeout is not defined -}} tcp_user_timeout = {{ postgresql_tcp_user_timeout | default(0) }}			# TCP_USER_TIMEOUT, in milliseconds;
+					# 0 selects the system default
 
-# TCP_KEEPINTVL, in seconds;
-# 0 selects the system default
-{{ '#' if postgresql_tcp_keepalives_interval is not defined -}} tcp_keepalives_interval = {{ postgresql_tcp_keepalives_interval | default(0) }}
-
-# TCP_KEEPCNT;
-# 0 selects the system default
-{{ '#' if postgresql_tcp_keepalives_count is not defined -}} tcp_keepalives_count = {{ postgresql_tcp_keepalives_count | default(0) }}
-
-# TCP_USER_TIMEOUT, in milliseconds;
-# 0 selects the system default
-{{ '#' if postgresql_tcp_user_timeout is not defined -}} tcp_user_timeout = {{ postgresql_tcp_user_timeout | default(0) }}
-
-# time between checks for client
-# disconnection while running queries;
-# 0 for never
-{{ '#' if postgresql_client_connection_check_interval is not defined -}} client_connection_check_interval = {{ postgresql_client_connection_check_interval | default(0) }}
+{{ '#' if postgresql_client_connection_check_interval is not defined -}} client_connection_check_interval = {{ postgresql_client_connection_check_interval | default(0) }}	# time between checks for client
+					# disconnection while running queries;
+					# 0 for never
 
 # - Authentication -
 
-# 1s-600s
-{{ '#' if authentication_timeout is not defined -}} authentication_timeout = {{ postgresql_authentication_timeout | default("1min") }}
-
-# scram-sha-256 or (deprecated) md5
-{{ '#' if postgresql_password_encryption is not defined -}} password_encryption = {{ postgresql_password_encryption | default("scram-sha-256") }}
-
+{{ '#' if postgresql_authentication_timeout is not defined -}} authentication_timeout = {{ postgresql_authentication_timeout | default("1min") }}		# 1s-600s
+{{ '#' if postgresql_password_encryption is not defined -}} password_encryption = {{ postgresql_password_encryption | default("scram-sha-256") }}	# scram-sha-256 or (deprecated) md5
 {{ '#' if postgresql_scram_iterations is not defined -}} scram_iterations = {{ postgresql_scram_iterations | default(4096) }}
-
-# display md5 deprecation warnings?
-{{ '#' if postgresql_md5_password_warnings is not defined -}} md5_password_warnings = {{ 'on' if (postgresql_md5_password_warnings | default(true)) else 'off' }}
-
-# comma-separated list of trusted validator modules
-{{ '#' if postgresql_oauth_validator_libraries is not defined -}} oauth_validator_libraries = '{{ postgresql_oauth_validator_libraries | default("") }}'
+{{ '#' if postgresql_md5_password_warnings is not defined -}} md5_password_warnings = {{ 'on' if (postgresql_md5_password_warnings | default(true)) else 'off' }}		# display md5 deprecation warnings?
+{{ '#' if postgresql_oauth_validator_libraries is not defined -}} oauth_validator_libraries = '{{ postgresql_oauth_validator_libraries | default("") }}'	# comma-separated list of trusted validator modules
 
 # GSSAPI using Kerberos
 {{ '#' if postgresql_krb_server_keyfile is not defined -}} krb_server_keyfile = '{{ postgresql_krb_server_keyfile | default("FILE:${sysconfdir}/krb5.keytab") }}'
@@ -146,13 +112,8 @@
 {{ '#' if postgresql_ssl_crl_file is not defined -}} ssl_crl_file = '{{ postgresql_ssl_crl_file | default("") }}'
 {{ '#' if postgresql_ssl_crl_dir is not defined -}} ssl_crl_dir = '{{ postgresql_ssl_crl_dir | default("") }}'
 {{ '#' if postgresql_ssl_key_file is not defined -}} ssl_key_file = '{{ postgresql_ssl_key_file | default("server.key") }}'
-
-# allowed TLSv1.2 ciphers
-{{ '#' if postgresql_ssl_ciphers is not defined -}} ssl_ciphers = '{{ (postgresql_ssl_ciphers | default(["HIGH", "MEDIUM", "+3DES", "!aNULL"]))  | join(":") }}'
-
-# allowed TLSv1.3 cipher suites, blank for default
-{{ '#' if postgresql_ssl_tls13_ciphers is not defined -}} ssl_tls13_ciphers = '{{ (postgresql_ssl_tls13_ciphers | default([]))  | join(":") }}'
-
+{{ '#' if postgresql_ssl_ciphers is not defined -}} ssl_ciphers = '{{ (postgresql_ssl_ciphers | default(["HIGH", "MEDIUM", "+3DES", "!aNULL"]))  | join(":") }}'	# allowed TLSv1.2 ciphers
+{{ '#' if postgresql_ssl_tls13_ciphers is not defined -}} ssl_tls13_ciphers = '{{ (postgresql_ssl_tls13_ciphers | default([]))  | join(":") }}'	# allowed TLSv1.3 cipher suites, blank for default
 {{ '#' if postgresql_ssl_prefer_server_ciphers is not defined -}} ssl_prefer_server_ciphers = {{ 'on' if (postgresql_ssl_prefer_server_ciphers | default(true)) else 'off' }}
 {{ '#' if postgresql_ssl_groups is not defined -}} ssl_groups = '{{ (postgresql_ssl_groups | default(["X25519", "prime256v1"])) | join(":") }}'
 {{ '#' if postgresql_ssl_min_protocol_version is not defined -}} ssl_min_protocol_version = '{{ (postgresql_ssl_min_protocol_version | default("TLSv1.2")) }}'
@@ -168,177 +129,100 @@
 
 # - Memory -
 
-# min 128kB
-# (change requires restart)
-{{ '#' if postgresql_shared_buffers is not defined -}} shared_buffers = {{ postgresql_shared_buffers | default("128MB") }}
-
-# on, off, or try
-# (change requires restart)
-{{ '#' if postgresql_huge_pages is not defined -}} huge_pages = {{ postgresql_huge_pages | default("try") }}
-
-# zero for system default
-# (change requires restart)
-{{ '#' if postgresql_huge_page_size is not defined -}} huge_page_size = {{ postgresql_huge_page_size | default("0") }}
-
-# min 800kB
-{{ '#' if postgresql_temp_buffers is not defined -}} temp_buffers = {{ postgresql_temp_buffers | default("8MB") }}
-
-# zero disables the feature
-# (change requires restart)
+{{ '#' if postgresql_shared_buffers is not defined -}} shared_buffers = {{ postgresql_shared_buffers | default("128MB") }}			# min 128kB
+					# (change requires restart)
+{{ '#' if postgresql_huge_pages is not defined -}} huge_pages = {{ postgresql_huge_pages | default("try") }}			# on, off, or try
+					# (change requires restart)
+{{ '#' if postgresql_huge_page_size is not defined -}} huge_page_size = {{ postgresql_huge_page_size | default("0") }}			# zero for system default
+					# (change requires restart)
+{{ '#' if postgresql_temp_buffers is not defined -}} temp_buffers = {{ postgresql_temp_buffers | default("8MB") }}			# min 800kB
+{{ '#' if postgresql_max_prepared_transactions is not defined -}} max_prepared_transactions = {{ postgresql_max_prepared_transactions | default(0) }}		# zero disables the feature
+					# (change requires restart)
 # Caution: it is not advisable to set max_prepared_transactions nonzero unless
 # you actively intend to use prepared transactions.
-{{ '#' if postgresql_max_prepared_transactions is not defined -}} max_prepared_transactions = {{ postgresql_max_prepared_transactions | default(0) }}
-
-# min 64kB
-{{ '#' if postgresql_work_mem is not defined -}} work_mem = {{ postgresql_work_mem | default("4MB") }}
-
-# 1-1000.0 multiplier on hash table work_mem
-{{ '#' if postgresql_hash_mem_multiplier is not defined -}} hash_mem_multiplier = {{ postgresql_hash_mem_multiplier | default(2.0) }}
-
-# min 64kB
-{{ '#' if postgresql_maintenance_work_mem is not defined -}} maintenance_work_mem = {{ postgresql_maintenance_work_mem | default("64MB") }}
-
-# min 64kB, or -1 to use maintenance_work_mem
-{{ '#' if postgresql_autovacuum_work_mem is not defined -}} autovacuum_work_mem = {{ postgresql_autovacuum_work_mem | default("-1") }}
-
-# min 64kB
-{{ '#' if postgresql_logical_decoding_work_mem is not defined -}} logical_decoding_work_mem = {{ postgresql_logical_decoding_work_mem | default("64MB") }}
-
-# min 100kB
-{{ '#' if postgresql_max_stack_depth is not defined -}} max_stack_depth = {{ postgresql_max_stack_depth | default("2MB") }}
-
-# the default is the first option
-# supported by the operating system:
-#   mmap
-#   sysv
-#   windows
-# (change requires restart)
-{{ '#' if postgresql_shared_memory_type is not defined -}} shared_memory_type = {{ postgresql_shared_memory_type | default("mmap") }}
-
-# the default is usually the first option
-# supported by the operating system:
-#   posix
-#   sysv
-#   windows
-#   mmap
-# (change requires restart)
-{{ '#' if postgresql_dynamic_shared_memory_type is not defined -}} dynamic_shared_memory_type = {{ postgresql_dynamic_shared_memory_type | default("posix") }}
-
-# (change requires restart)
-{{ '#' if postgresql_min_dynamic_shared_memory is not defined -}} min_dynamic_shared_memory = {{ postgresql_min_dynamic_shared_memory | default("0") }}
-
-# size of vacuum and analyze buffer access strategy ring;
-# 0 to disable vacuum buffer access strategy;
-# range 128kB to 16GB
-{{ '#' if postgresql_vacuum_buffer_usage_limit is not defined -}} vacuum_buffer_usage_limit = {{ postgresql_vacuum_buffer_usage_limit | default("2MB") }}
+{{ '#' if postgresql_work_mem is not defined -}} work_mem = {{ postgresql_work_mem | default("4MB") }}				# min 64kB
+{{ '#' if postgresql_hash_mem_multiplier is not defined -}} hash_mem_multiplier = {{ postgresql_hash_mem_multiplier | default(2.0) }}		# 1-1000.0 multiplier on hash table work_mem
+{{ '#' if postgresql_maintenance_work_mem is not defined -}} maintenance_work_mem = {{ postgresql_maintenance_work_mem | default("64MB") }}		# min 64kB
+{{ '#' if postgresql_autovacuum_work_mem is not defined -}} autovacuum_work_mem = {{ postgresql_autovacuum_work_mem | default("-1") }}		# min 64kB, or -1 to use maintenance_work_mem
+{{ '#' if postgresql_logical_decoding_work_mem is not defined -}} logical_decoding_work_mem = {{ postgresql_logical_decoding_work_mem | default("64MB") }}	# min 64kB
+{{ '#' if postgresql_max_stack_depth is not defined -}} max_stack_depth = {{ postgresql_max_stack_depth | default("2MB") }}			# min 100kB
+{{ '#' if postgresql_shared_memory_type is not defined -}} shared_memory_type = {{ postgresql_shared_memory_type | default("mmap") }}		# the default is the first option
+					# supported by the operating system:
+					#   mmap
+					#   sysv
+					#   windows
+					# (change requires restart)
+{{ '#' if postgresql_dynamic_shared_memory_type is not defined -}} dynamic_shared_memory_type = {{ postgresql_dynamic_shared_memory_type | default("posix") }}	# the default is usually the first option
+					# supported by the operating system:
+					#   posix
+					#   sysv
+					#   windows
+					#   mmap
+					# (change requires restart)
+{{ '#' if postgresql_min_dynamic_shared_memory is not defined -}} min_dynamic_shared_memory = {{ postgresql_min_dynamic_shared_memory | default("0") }}	# (change requires restart)
+{{ '#' if postgresql_vacuum_buffer_usage_limit is not defined -}} vacuum_buffer_usage_limit = {{ postgresql_vacuum_buffer_usage_limit | default("2MB") }}	# size of vacuum and analyze buffer access strategy ring;
+					# 0 to disable vacuum buffer access strategy;
+					# range 128kB to 16GB
 
 # SLRU buffers (change requires restart)
-# memory for pg_commit_ts (0 = auto)
-{{ '#' if postgresql_commit_timestamp_buffers is not defined -}} commit_timestamp_buffers = {{ postgresql_commit_timestamp_buffers | default("0") }}
-
-# memory for pg_multixact/offsets
-{{ '#' if postgresql_multixact_offset_buffers is not defined -}} multixact_offset_buffers = {{ postgresql_multixact_offset_buffers | default("16") }}
-
-# memory for pg_multixact/members
-{{ '#' if postgresql_multixact_member_buffers is not defined -}} multixact_member_buffers = {{ postgresql_multixact_member_buffers | default("32") }}
-
-# memory for pg_notify
-{{ '#' if postgresql_notify_buffers is not defined -}} notify_buffers = {{ postgresql_notify_buffers | default("16") }}
-
-# memory for pg_serial
-{{ '#' if postgresql_serializable_buffers is not defined -}} serializable_buffers = {{ postgresql_serializable_buffers | default("32") }}
-
-# memory for pg_subtrans (0 = auto)
-{{ '#' if postgresql_subtransaction_buffers is not defined -}} subtransaction_buffers = {{ postgresql_subtransaction_buffers | default("0") }}
-
-# memory for pg_xact (0 = auto)
-{{ '#' if postgresql_transaction_buffers is not defined -}} transaction_buffers = {{ postgresql_transaction_buffers | default("0") }}
+{{ '#' if postgresql_commit_timestamp_buffers is not defined -}} commit_timestamp_buffers = {{ postgresql_commit_timestamp_buffers | default("0") }}		# memory for pg_commit_ts (0 = auto)
+{{ '#' if postgresql_multixact_offset_buffers is not defined -}} multixact_offset_buffers = {{ postgresql_multixact_offset_buffers | default("16") }}		# memory for pg_multixact/offsets
+{{ '#' if postgresql_multixact_member_buffers is not defined -}} multixact_member_buffers = {{ postgresql_multixact_member_buffers | default("32") }}		# memory for pg_multixact/members
+{{ '#' if postgresql_notify_buffers is not defined -}} notify_buffers = {{ postgresql_notify_buffers | default("16") }}			# memory for pg_notify
+{{ '#' if postgresql_serializable_buffers is not defined -}} serializable_buffers = {{ postgresql_serializable_buffers | default("32") }}		# memory for pg_serial
+{{ '#' if postgresql_subtransaction_buffers is not defined -}} subtransaction_buffers = {{ postgresql_subtransaction_buffers | default("0") }}		# memory for pg_subtrans (0 = auto)
+{{ '#' if postgresql_transaction_buffers is not defined -}} transaction_buffers = {{ postgresql_transaction_buffers | default("0") }}		# memory for pg_xact (0 = auto)
 
 # - Disk -
 
-# limits per-process temp file space
-# in kilobytes, or -1 for no limit
-{{ '#' if postgresql_temp_file_limit is not defined -}} temp_file_limit = {{ postgresql_temp_file_limit | default("-1") }}
+{{ '#' if postgresql_temp_file_limit is not defined -}} temp_file_limit = {{ postgresql_temp_file_limit | default("-1") }}			# limits per-process temp file space
+					# in kilobytes, or -1 for no limit
 
-# copy, clone (if supported by OS)
-{{ '#' if postgresql_file_copy_method is not defined -}} file_copy_method = {{ postgresql_file_copy_method | default("copy") }}
+{{ '#' if postgresql_file_copy_method is not defined -}} file_copy_method = {{ postgresql_file_copy_method | default("copy") }}		# copy, clone (if supported by OS)
+{{ '#' if postgresql_file_extend_method is not defined -}} file_extend_method = {{ postgresql_file_extend_method | default("posix_fallocate") }}   # the default is the first option supported
+					# by the operating system:
+					#   posix_fallocate (most Unix-like systems)
+					#   write_zeros
 
-# the default is the first option supported
-# by the operating system:
-#   posix_fallocate (most Unix-like systems)
-#   write_zeros
-{{ '#' if postgresql_file_extend_method is not defined -}} file_extend_method = {{ postgresql_file_extend_method | default("posix_fallocate") }}
-
-# limits the number of SLRU pages allocated
-# for NOTIFY / LISTEN queue
-{{ '#' if postgresql_max_notify_queue_pages is not defined -}} max_notify_queue_pages = {{ postgresql_max_notify_queue_pages | default(1048576) }}
+{{ '#' if postgresql_max_notify_queue_pages is not defined -}} max_notify_queue_pages = {{ postgresql_max_notify_queue_pages | default(1048576) }}	# limits the number of SLRU pages allocated
+					# for NOTIFY / LISTEN queue
 
 # - Kernel Resources -
 
-# min 64
-# (change requires restart)
-{{ '#' if postgresql_max_files_per_process is not defined -}} max_files_per_process = {{ postgresql_max_files_per_process | default(1000) }}
+{{ '#' if postgresql_max_files_per_process is not defined -}} max_files_per_process = {{ postgresql_max_files_per_process | default(1000) }}		# min 64
+					# (change requires restart)
 
 # - Background Writer -
 
-# 10-10000ms between rounds
-{{ '#' if postgresql_bgwriter_delay is not defined -}} bgwriter_delay = {{ postgresql_bgwriter_delay | default("200ms") }}
-
-# max buffers written/round, 0 disables
-{{ '#' if postgresql_bgwriter_lru_maxpages is not defined -}} bgwriter_lru_maxpages = {{ postgresql_bgwriter_lru_maxpages | default(100) }}
-
-# 0-10.0 multiplier on buffers scanned/round
-{{ '#' if postgresql_bgwriter_lru_multiplier is not defined -}} bgwriter_lru_multiplier = {{ postgresql_bgwriter_lru_multiplier | default(2.0) }}
-
-# measured in pages, 0 disables
-{{ '#' if postgresql_bgwriter_flush_after is not defined -}} bgwriter_flush_after = {{ postgresql_bgwriter_flush_after | default("512kB") }}
+{{ '#' if postgresql_bgwriter_delay is not defined -}} bgwriter_delay = {{ postgresql_bgwriter_delay | default("200ms") }}			# 10-10000ms between rounds
+{{ '#' if postgresql_bgwriter_lru_maxpages is not defined -}} bgwriter_lru_maxpages = {{ postgresql_bgwriter_lru_maxpages | default(100) }}		# max buffers written/round, 0 disables
+{{ '#' if postgresql_bgwriter_lru_multiplier is not defined -}} bgwriter_lru_multiplier = {{ postgresql_bgwriter_lru_multiplier | default(2.0) }}		# 0-10.0 multiplier on buffers scanned/round
+{{ '#' if postgresql_bgwriter_flush_after is not defined -}} bgwriter_flush_after = {{ postgresql_bgwriter_flush_after | default("512kB") }}		# measured in pages, 0 disables
 
 # - I/O -
 
-# measured in pages, 0 disables
-{{ '#' if postgresql_backend_flush_after is not defined -}} backend_flush_after = {{ postgresql_backend_flush_after | default(0) }}
+{{ '#' if postgresql_backend_flush_after is not defined -}} backend_flush_after = {{ postgresql_backend_flush_after | default(0) }}		# measured in pages, 0 disables
+{{ '#' if postgresql_effective_io_concurrency is not defined -}} effective_io_concurrency = {{ postgresql_effective_io_concurrency | default(16) }}		# 1-1000; 0 disables issuing multiple simultaneous IO requests
+{{ '#' if postgresql_maintenance_io_concurrency is not defined -}} maintenance_io_concurrency = {{ postgresql_maintenance_io_concurrency | default(16) }}	# 1-1000; same as effective_io_concurrency
+{{ '#' if postgresql_io_max_combine_limit is not defined -}} io_max_combine_limit = {{ postgresql_io_max_combine_limit | default("128kB") }}		# usually 1-128 blocks (depends on OS)
+					# (change requires restart)
+{{ '#' if postgresql_io_combine_limit is not defined -}} io_combine_limit = {{ postgresql_io_combine_limit | default("128kB") }}		# usually 1-128 blocks (depends on OS)
 
-# 1-1000; 0 disables issuing multiple simultaneous IO requests
-{{ '#' if postgresql_effective_io_concurrency is not defined -}} effective_io_concurrency = {{ postgresql_effective_io_concurrency | default(16) }}
-
-# 1-1000; same as effective_io_concurrency
-{{ '#' if postgresql_maintenance_io_concurrency is not defined -}} maintenance_io_concurrency = {{ postgresql_maintenance_io_concurrency | default(16) }}
-
-# usually 1-128 blocks (depends on OS)
-# (change requires restart)
-{{ '#' if postgresql_io_max_combine_limit is not defined -}} io_max_combine_limit = {{ postgresql_io_max_combine_limit | default("128kB") }}
-
-# usually 1-128 blocks (depends on OS)
-{{ '#' if postgresql_io_combine_limit is not defined -}} io_combine_limit = {{ postgresql_io_combine_limit | default("128kB") }}
-
-# worker, io_uring, sync
-# (change requires restart)
-{{ '#' if postgresql_io_method is not defined -}} io_method = {{ postgresql_io_method | default("worker") }}
-
-# Max number of IOs that one process
-# can execute simultaneously
-# -1 sets based on shared_buffers
-# (change requires restart)
-{{ '#' if postgresql_io_max_concurrency is not defined -}} io_max_concurrency = {{ postgresql_io_max_concurrency | default(-1) }}
-
-# 1-32;
-{{ '#' if postgresql_io_workers is not defined -}} io_workers = {{ postgresql_io_workers | default(3) }}
+{{ '#' if postgresql_io_method is not defined -}} io_method = {{ postgresql_io_method | default("worker") }}			# worker, io_uring, sync
+					# (change requires restart)
+{{ '#' if postgresql_io_max_concurrency is not defined -}} io_max_concurrency = {{ postgresql_io_max_concurrency | default(-1) }}		# Max number of IOs that one process
+					# can execute simultaneously
+					# -1 sets based on shared_buffers
+					# (change requires restart)
+{{ '#' if postgresql_io_workers is not defined -}} io_workers = {{ postgresql_io_workers | default(3) }}				# 1-32;
 
 # - Worker Processes -
 
-# (change requires restart)
-{{ '#' if postgresql_max_worker_processes is not defined -}} max_worker_processes = {{ postgresql_max_worker_processes | default(8) }}
-
-# limited by max_parallel_workers
-{{ '#' if postgresql_max_parallel_workers_per_gather is not defined -}} max_parallel_workers_per_gather = {{ postgresql_max_parallel_workers_per_gather | default(2) }}
-
-# limited by max_parallel_workers
-{{ '#' if postgresql_max_parallel_maintenance_workers is not defined -}} max_parallel_maintenance_workers = {{ postgresql_max_parallel_maintenance_workers | default (2) }}
-
-# number of max_worker_processes that
-# can be used in parallel operations
-{{ '#' if postgresql_max_parallel_workers is not defined -}} max_parallel_workers = {{ postgresql_max_parallel_workers | default(8) }}
-
+{{ '#' if postgresql_max_worker_processes is not defined -}} max_worker_processes = {{ postgresql_max_worker_processes | default(8) }}		# (change requires restart)
+{{ '#' if postgresql_max_parallel_workers_per_gather is not defined -}} max_parallel_workers_per_gather = {{ postgresql_max_parallel_workers_per_gather | default(2) }}	# limited by max_parallel_workers
+{{ '#' if postgresql_max_parallel_maintenance_workers is not defined -}} max_parallel_maintenance_workers = {{ postgresql_max_parallel_maintenance_workers | default (2) }}	# limited by max_parallel_workers
+{{ '#' if postgresql_max_parallel_workers is not defined -}} max_parallel_workers = {{ postgresql_max_parallel_workers | default(8) }}		# number of max_worker_processes that
+					# can be used in parallel operations
 {{ '#' if postgresql_parallel_leader_participation is not defined -}} parallel_leader_participation = {{ "on" if (postgresql_parallel_leader_participation | default(true)) else "off" }}
 
 
@@ -348,104 +232,104 @@
 
 # - Settings -
 
-#wal_level = replica			# minimal, replica, or logical
+{{ '#' if postgresql_wal_level is not defined -}} wal_level = {{ postgresql_wal_level | default("replica") }}			# minimal, replica, or logical
 					# (change requires restart)
-#fsync = on				# flush data to disk for crash safety
+{{ '#' if postgresql_fsync is not defined -}} fsync = {{ "on" if (postgresql_fsync | default(true)) else "off" }}				# flush data to disk for crash safety
 					# (turning this off can cause
 					# unrecoverable data corruption)
-#synchronous_commit = on		# synchronization level;
+{{ '#' if postgresql_synchronous_commit is not defined -}} synchronous_commit = {{ postgresql_synchronous_commit | default("on") }}		# synchronization level;
 					# off, local, remote_write, remote_apply, or on
-#wal_sync_method = fsync		# the default is the first option
+{{ '#' if postgresql_wal_sync_method is not defined -}} wal_sync_method = {{ postgresql_wal_sync_method | default("fsync") }}		# the default is the first option
 					# supported by the operating system:
 					#   open_datasync
 					#   fdatasync (default on Linux and FreeBSD)
 					#   fsync
 					#   fsync_writethrough
 					#   open_sync
-#full_page_writes = on			# recover from partial page writes
-#wal_log_hints = off			# also do full page writes of non-critical updates
+{{ '#' if postgresql_full_page_writes is not defined -}} full_page_writes = {{ "on" if (postgresql_full_page_writes | default(true)) else "off" }}			# recover from partial page writes
+{{ '#' if postgresql_wal_log_hints is not defined -}} wal_log_hints = {{ "on" if (postgresql_wal_log_hints | default(false)) else "off" }}			# also do full page writes of non-critical updates
 					# (change requires restart)
-#wal_compression = off			# enables compression of full-page writes;
+{{ '#' if postgresql_wal_compression is not defined -}} wal_compression = {{ postgresql_wal_compression | default("off") }}			# enables compression of full-page writes;
 					# off, pglz (or "on"), lz4, or zstd
-#wal_init_zero = on			# zero-fill new WAL files
-#wal_recycle = on			# recycle WAL files
-#wal_buffers = -1			# min 32kB, -1 sets based on shared_buffers
+{{ '#' if postgresql_wal_init_zero is not defined -}} wal_init_zero = {{ "on" if (postgresql_wal_init_zero | default(true)) else "off" }}			# zero-fill new WAL files
+{{ '#' if postgresql_wal_recycle is not defined -}} wal_recycle = {{ "on" if (postgresql_wal_recycle | default(true)) else "off" }}			# recycle WAL files
+{{ '#' if postgresql_wal_buffers is not defined -}} wal_buffers = {{ postgresql_wal_buffers | default("-1") }}			# min 32kB, -1 sets based on shared_buffers
 					# (change requires restart)
-#wal_writer_delay = 200ms		# 1-10000 milliseconds
-#wal_writer_flush_after = 1MB		# measured in pages, 0 disables
-#wal_skip_threshold = 2MB
+{{ '#' if postgresql_wal_writer_delay is not defined -}} wal_writer_delay = {{ postgresql_wal_writer_delay | default("200ms") }}		# 1-10000 milliseconds
+{{ '#' if postgresql_wal_writer_flush_after is not defined -}} wal_writer_flush_after = {{ postgresql_wal_writer_flush_after | default("1MB") }}		# measured in pages, 0 disables
+{{ '#' if postgresql_wal_skip_threshold is not defined -}} wal_skip_threshold = {{ postgresql_wal_skip_threshold | default("2MB") }}
 
-#commit_delay = 0			# range 0-100000, in microseconds
-#commit_siblings = 5			# range 0-1000
+{{ '#' if postgresql_commit_delay is not defined -}} commit_delay = {{ postgresql_commit_delay | default("0") }}			# range 0-100000, in microseconds
+{{ '#' if postgresql_commit_siblings is not defined -}} commit_siblings = {{ postgresql_commit_siblings | default(5) }}			# range 0-1000
 
 # - Checkpoints -
 
-#checkpoint_timeout = 5min		# range 30s-1d
-#checkpoint_completion_target = 0.9	# checkpoint target duration, 0.0 - 1.0
-#checkpoint_flush_after = 256kB		# measured in pages, 0 disables
-#checkpoint_warning = 30s		# 0 disables
-max_wal_size = 1GB
-min_wal_size = 80MB
+{{ '#' if postgresql_checkpoint_timeout is not defined -}} checkpoint_timeout = {{ postgresl_checkpoint_timeout | default("5min") }}		# range 30s-1d
+{{ '#' if postgresql_checkpoint_completion_target is not defined -}} checkpoint_completion_target ={{ postgresl_checkpoint_completion_target | default(0.9) }}	# checkpoint target duration, 0.0 - 1.0
+{{ '#' if postgresql_checkpoint_flush_after is not defined -}} checkpoint_flush_after = {{ postgresl_checkpoint_flush_after | default("256kB") }}		# measured in pages, 0 disables
+{{ '#' if postgresql_checkpoint_warning is not defined -}} checkpoint_warning = {{ postgresl_checkpoint_warning | default("30s") }}		# 0 disables
+{{ '#' if postgresql_max_wal_size is not defined -}} max_wal_size = {{ postgresl_max_wal_size | default("1GB") }}
+{{ '#' if postgresql_min_wal_size is not defined -}} min_wal_size = {{ postgresl_min_wal_size | default("80MB") }}
 
 # - Prefetching during recovery -
 
-#recovery_prefetch = try	# prefetch pages referenced in the WAL?
-#wal_decode_buffer_size = 512kB	# lookahead window used for prefetching
+{{ '#' if postgresql_recovery_prefetch is not defined -}} recovery_prefetch = {{ postgresql_recovery_prefetch | default("try") }}	# prefetch pages referenced in the WAL?
+{{ '#' if postgresql_wal_decode_buffer_size is not defined -}} wal_decode_buffer_size = {{ postgresql_wal_decode_buffer_size | default("512kB") }}	# lookahead window used for prefetching
 				# (change requires restart)
 
 # - Archiving -
 
-#archive_mode = off		# enables archiving; off, on, or always
+{{ '#' if postgresql_archive_mode is not defined -}} archive_mode = {{ postgresql_archive_mode | default("off") }}		# enables archiving; off, on, or always
 				# (change requires restart)
-#archive_library = ''		# library to use to archive a WAL file
+{{ '#' if postgresql_archive_library is not defined -}} archive_library = '{{ postgresql_archive_library | default("") }}'		# library to use to archive a WAL file
 				# (empty string indicates archive_command should
 				# be used)
-#archive_command = ''		# command to use to archive a WAL file
+{{ '#' if postgresql_archive_command is not defined -}} archive_command = '{{ postgresql_archive_command | default("") }}'		# command to use to archive a WAL file
 				# placeholders: %p = path of file to archive
 				#               %f = file name only
 				# e.g. 'test ! -f /mnt/server/archivedir/%f && cp %p /mnt/server/archivedir/%f'
-#archive_timeout = 0		# force a WAL file switch after this
+{{ '#' if postgresql_archive_timeout is not defined -}} archive_timeout = {{ postgresql_archive_timeout | default(0) }}		# force a WAL file switch after this
 				# number of seconds; 0 disables
 
 # - Archive Recovery -
 
 # These are only used in recovery mode.
 
-#restore_command = ''		# command to use to restore an archived WAL file
+{{ '#' if postgresql_restore_command is not defined -}} restore_command = '{{ postgresql_restore_command | default("") }}'		# command to use to restore an archived WAL file
 				# placeholders: %p = path of file to restore
 				#               %f = file name only
 				# e.g. 'cp /mnt/server/archivedir/%f %p'
-#archive_cleanup_command = ''	# command to execute at every restartpoint
-#recovery_end_command = ''	# command to execute at completion of recovery
+{{ '#' if postgresql_archive_cleanup_command is not defined -}} archive_cleanup_command = '{{ postgresql_archive_cleanup_command | default("") }}'	# command to execute at every restartpoint
+{{ '#' if postgresql_recovery_end_command is not defined -}} recovery_end_command = '{{ postgresql_recovery_end_command | default("") }}'	# command to execute at completion of recovery
 
 # - Recovery Target -
 
 # Set these only when performing a targeted recovery.
 
-#recovery_target = ''		# 'immediate' to end recovery as soon as a
+{{ '#' if postgresql_recovery_target is not defined -}} recovery_target = '{{ postgresql_recovery_target | default("") }}'		# 'immediate' to end recovery as soon as a
 				# consistent state is reached
 				# (change requires restart)
-#recovery_target_name = ''	# the named restore point to which recovery will proceed
+{{ '#' if postgresql_recovery_target_name is not defined -}} recovery_target_name = '{{ postgresql_recovery_target_name | default("") }}'	# the named restore point to which recovery will proceed
 				# (change requires restart)
-#recovery_target_time = ''	# the time stamp up to which recovery will proceed
+{{ '#' if postgresql_recovery_target_time is not defined -}} recovery_target_time = '{{ postgresql_recovery_target_time | default("") }}'	# the time stamp up to which recovery will proceed
 				# (change requires restart)
-#recovery_target_xid = ''	# the transaction ID up to which recovery will proceed
+{{ '#' if postgresql_recovery_target_xid is not defined -}} recovery_target_xid = '{{ postgresql_recovery_target_xid | default("") }}'	# the transaction ID up to which recovery will proceed
 				# (change requires restart)
-#recovery_target_lsn = ''	# the WAL LSN up to which recovery will proceed
+{{ '#' if postgresql_recovery_target_lsn is not defined -}} recovery_target_lsn = '{{ postgresql_recovery_target_lsn | default("") }}'	# the WAL LSN up to which recovery will proceed
 				# (change requires restart)
-#recovery_target_inclusive = on	# Specifies whether to stop:
+{{ '#' if postgresql_recovery_target_inclusive is not defined -}} recovery_target_inclusive = {{ "on" if (postgresql_recovery_target_inclusive | default(true)) else "off" }}	# Specifies whether to stop:
 				# just after the specified recovery target (on)
 				# just before the recovery target (off)
 				# (change requires restart)
-#recovery_target_timeline = 'latest'	# 'current', 'latest', or timeline ID
+{{ '#' if postgresql_recovery_target_timeline is not defined -}} recovery_target_timeline = '{{ postgresql_recovery_target_timeline | default("latest") }}'	# 'current', 'latest', or timeline ID
 					# (change requires restart)
-#recovery_target_action = 'pause'	# 'pause', 'promote', 'shutdown'
+{{ '#' if postgresql_recovery_target_action is not defined -}} recovery_target_action = '{{ postgresql_recovery_target_action | default("pause") }}'	# 'pause', 'promote', 'shutdown'
 					# (change requires restart)
 
 # - WAL Summarization -
 
-#summarize_wal = off		# run WAL summarizer process?
-#wal_summary_keep_time = '10d'	# when to remove old summary files, 0 = never
+{{ '#' if postgresql_summarize_wal is not defined -}} summarize_wal = {{ "on" if (postgresql_summarize_wal | default(false)) else "off" }}		# run WAL summarizer process?
+{{ '#' if postgresql_wal_summary_keep_time is not defined -}} wal_summary_keep_time = '{{ postgresql_wal_summary_keep_time | default("10d") }}'	# when to remove old summary files, 0 = never
 
 
 #------------------------------------------------------------------------------
